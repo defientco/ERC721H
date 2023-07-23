@@ -6,6 +6,7 @@ import {DSTest} from "ds-test/test.sol";
 import {ERC721ACHMock} from "./utils/ERC721ACHMock.sol";
 import {IERC721A} from "lib/ERC721A/contracts/IERC721A.sol";
 import {BalanceOfHookTest} from "./hooks/BalanceOfHook.t.sol";
+import {IBalanceOfHook} from "../src/interfaces/IBalanceOfHook.sol";
 
 contract ERC721ACHTest is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);
@@ -22,6 +23,12 @@ contract ERC721ACHTest is DSTest {
     function test_Erc721() public {
         assertEq("ERC-721ACH Mock", erc721Mock.name());
         assertEq("MOCK", erc721Mock.symbol());
+    }
+
+    function test_balanceOfHook(address balanceOfHook) public {
+        assertEq(address(0), address(erc721Mock.balanceOfHook()));
+        erc721Mock.setBalanceOfHook(IBalanceOfHook(balanceOfHook));
+        assertEq(balanceOfHook, address(erc721Mock.balanceOfHook()));
     }
 
     function test_ownerOf(uint256 _mintQuantity) public {
