@@ -5,6 +5,7 @@ import {Vm} from "forge-std/Vm.sol";
 import {DSTest} from "ds-test/test.sol";
 import {ERC721ACHMock} from "./utils/ERC721ACHMock.sol";
 import {IERC721A} from "lib/ERC721A/contracts/IERC721A.sol";
+import {BalanceOfHookTest} from "./hooks/BalanceOfHook.t.sol";
 
 contract ERC721ACHTest is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);
@@ -21,20 +22,6 @@ contract ERC721ACHTest is DSTest {
     function test_Erc721() public {
         assertEq("ERC-721ACH Mock", erc721Mock.name());
         assertEq("MOCK", erc721Mock.symbol());
-    }
-
-    function test_balanceOf(uint256 _mintQuantity) public {
-        vm.assume(_mintQuantity > 0);
-        vm.assume(_mintQuantity < 10_000);
-
-        // Verify normal functionality
-        assertEq(0, erc721Mock.balanceOf(DEFAULT_BUYER_ADDRESS));
-        erc721Mock.mint(DEFAULT_BUYER_ADDRESS, _mintQuantity);
-        assertEq(_mintQuantity, erc721Mock.balanceOf(DEFAULT_BUYER_ADDRESS));
-
-        // Verify hook override
-        erc721Mock.setHooksEnabled(true);
-        assertEq(0, erc721Mock.balanceOf(DEFAULT_BUYER_ADDRESS));
     }
 
     function test_ownerOf(uint256 _mintQuantity) public {
