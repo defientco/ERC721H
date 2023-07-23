@@ -1,8 +1,8 @@
-# CRE8ORS
+# ERC721H
 
-- the CRE8ORS
-
-<img width="571" alt="Screenshot 2022-12-01 at 12 04 32 PM" src="https://user-images.githubusercontent.com/23249402/205087429-8f33a283-07a7-4ec4-bbeb-c9ad293bf107.png">
+- extends [ERC721A](https://www.azuki.com/erc721a)
+- extends [ERC721C](https://github.com/limitbreakinc/creator-token-contracts)
+- implemented in [CRE8ORS](https://twitter.com/Cre8orsNFT)
 
 ### Getting Started
 
@@ -11,16 +11,10 @@
 
 ### Features
 
-- `purchase(uint256 quantity)`
-- `purchasePresale(...)`
-- `adminMint(address recipient, uint256 quantity)`
-- `adminMintAirdrop(address[] calldata recipients)`
-- Royalties - IERC2981
+- ERC721AH (TODO): supports ERC721A
+- ERC721CH (TODO): supports ERC721C
+- ERC721ACH: supports both ERC721A & ERC721C.
 
 ### Admin capabilities
 
-- `setOwner()`
-- `setFundsRecipient()`
-- `setSaleConfiguration()`
-- `setMetadataRenderer()`
-- `withdraw()`
+- manage hooks
