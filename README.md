@@ -1,6 +1,8 @@
-# CRE8ORS
+# ERC721H: Hooks for ERC721
 
-- the CRE8ORS
+- builds on ERC721A
+- builds on ERC721C
+- CRE8ORS: implementation of ERC721ACH
 
 <img width="571" alt="Screenshot 2022-12-01 at 12 04 32 PM" src="https://user-images.githubusercontent.com/23249402/205087429-8f33a283-07a7-4ec4-bbeb-c9ad293bf107.png">
 
@@ -11,16 +13,10 @@
 
 ### Features
 
-- `purchase(uint256 quantity)`
-- `purchasePresale(...)`
-- `adminMint(address recipient, uint256 quantity)`
-- `adminMintAirdrop(address[] calldata recipients)`
-- Royalties - IERC2981
+- ERC721AH: supports ERC721A
+- ERC721CH: supports ERC721C
+- ERC721ACH: supports both ERC721A & ERC721C
 
 ### Admin capabilities
 
-- `setOwner()`
-- `setFundsRecipient()`
-- `setSaleConfiguration()`
-- `setMetadataRenderer()`
-- `withdraw()`
+- hook management
