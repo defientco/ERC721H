@@ -18,3 +18,12 @@
 ### Admin capabilities
 
 - manage hooks
+
+### TODO
+
+- fix failing unit tests in Github actions
+- ERC721AH
+- ERC721CH
+- initial README
+- `IHookManager.sol`
+- `IHook.sol`
