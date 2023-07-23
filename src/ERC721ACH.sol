@@ -3,6 +3,7 @@ pragma solidity ^0.8.15;
 
 import {ERC721AC} from "ERC721C/erc721c/ERC721AC.sol";
 import {IERC721A} from "erc721a/contracts/IERC721A.sol";
+import {IBalanceOfHook} from "./interfaces/IBalanceOfHook.sol";
 
 /**
  * @title ERC721ACH
@@ -49,6 +50,8 @@ contract ERC721ACH is ERC721AC {
         uint256 tokenId,
         bytes data
     );
+
+    IBalanceOfHook public balanceOfHook;
 
     /// @notice Contract constructor
     /// @param _contractName The name for the token contract
