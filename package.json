@@ -1,8 +1,8 @@
 {
-  "name": "@zoralabs/nft-drop-contracts",
-  "version": "1.0.1",
-  "description": "ZORA NFT Drops Contracts",
-  "author": "ZORA",
+  "name": "erc721h",
+  "version": "0.0.1",
+  "description": "ERC721 extension for hooks",
+  "author": "Cre8ors Inc.",
   "license": "MIT",
   "private": false,
   "type": "module",
