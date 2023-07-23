@@ -51,6 +51,14 @@ contract ERC721ACH is ERC721AC {
         bytes data
     );
 
+    /// @notice Emitted when transferFrom hook is used
+    /// @param caller The caller
+    /// @param balanceOfHook The new hook
+    event UpdatedHook_BalanceOf(
+        address indexed caller,
+        address indexed balanceOfHook
+    );
+
     IBalanceOfHook public balanceOfHook;
 
     /// @notice Contract constructor
@@ -76,8 +84,11 @@ contract ERC721ACH is ERC721AC {
     function balanceOf(
         address owner
     ) public view virtual override returns (uint256) {
-        if (_useBalanceOfHook(owner)) {
-            return _balanceOfHook(owner);
+        if (
+            address(balanceOfHook) != address(0) &&
+            balanceOfHook.useBalanceOfHook(owner)
+        ) {
+            return balanceOfHook.balanceOfOverrideHook(owner);
         }
         return super.balanceOf(owner);
     }
@@ -185,20 +196,6 @@ contract ERC721ACH is ERC721AC {
     /////////////////////////////////////////////////
     /// ERC721 Hooks
     /////////////////////////////////////////////////
-
-    /// @notice balanceOf Hook for custom implementation.
-    /// @param owner The address to query the balance of
-    /// @dev Returns the balance of the specified address
-    function _balanceOfHook(
-        address owner
-    ) internal view virtual returns (uint256) {}
-
-    /// @notice Check if the balanceOf function should use hook.
-    /// @param owner The address to query the balance of
-    /// @dev Returns whether or not to use the hook for balanceOf function
-    function _useBalanceOfHook(
-        address owner
-    ) internal view virtual returns (bool) {}
 
     /// @notice ownerOf Hook for custom implementation.
     /// @param tokenId The token ID to query the owner of
@@ -337,4 +334,14 @@ contract ERC721ACH is ERC721AC {
 
     /// @notice Override the function to throw if caller is not contract owner
     function _requireCallerIsContractOwner() internal view virtual override {}
+
+    /////////////////////////////////////////////////
+    /// ERC721H Admin Controls
+    /////////////////////////////////////////////////
+
+    function setBalanceOfHook(IBalanceOfHook _balanceOfHook) external virtual {
+        _requireCallerIsContractOwner();
+        balanceOfHook = _balanceOfHook;
+        emit UpdatedHook_BalanceOf(msg.sender, address(_balanceOfHook));
+    }
 }
