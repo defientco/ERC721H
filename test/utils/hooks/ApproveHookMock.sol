@@ -27,7 +27,7 @@ contract ApproveHookMock is IApproveHook {
     function approveOverrideHook(
         address,
         uint256
-    ) external view override returns (uint256) {
+    ) external pure override returns (uint256) {
         revert ApproveHook_Executed();
     }
 }
