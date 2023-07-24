@@ -27,9 +27,12 @@ interface IERC721ACH {
         address indexed hook
     );
 
+    /// TODO
     function setBalanceOfHook(IBalanceOfHook _hook) external;
 
+    /// TODO
     function setOwnerOfHook(IOwnerOfHook _hook) external;
 
+    /// TODO
     function setSafeTransferFromHook(ISafeTransferFromHook _hook) external;
 }
