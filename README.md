@@ -23,10 +23,12 @@
 ### TODO
 
 - finish setting up `IMethodHooks.sol`
+- optimize hook setting in `ERC721ACH.sol` (struct?)
 - calculate gas costs (Minting / Contract Deployment / Transfers) compared to ERC721A
-- Migrate Staking to Hooks
+- Migrate Staking (`cre8ing.sol`) to Hooks
 - Subscription for Hooks ([ERC5643](https://eips.ethereum.org/EIPS/eip-5643))
 - NATSPEC docs (TODOs)
-- ERC721AH
-- ERC721CH
+- ERC721H - hooks on pure ERC721
+- ERC721AH - hooks on ERC721A (without ERC721C)
+- ERC721CH - hooks on ERC721C (without ERC721A)
 - update README

@@ -10,6 +10,7 @@ import {ITransferFromHook} from "./interfaces/ITransferFromHook.sol";
 import {IApproveHook} from "./interfaces/IApproveHook.sol";
 import {ISetApprovalForAllHook} from "./interfaces/ISetApprovalForAllHook.sol";
 import {IGetApprovedHook} from "./interfaces/IGetApprovedHook.sol";
+import {IIsApprovedForAllHook} from "./interfaces/IIsApprovedForAllHook.sol";
 import {IERC721ACH} from "./interfaces/IERC721ACH.sol";
 
 /**
@@ -19,6 +20,7 @@ import {IERC721ACH} from "./interfaces/IERC721ACH.sol";
  *         allows the contract owner to override hooks associated with core ERC721 functions.
  */
 contract ERC721ACH is ERC721AC, IERC721ACH {
+    // TODO: how can we store these in a more efficient way?
     IBalanceOfHook public balanceOfHook;
     IOwnerOfHook public ownerOfHook;
     ISafeTransferFromHook public safeTransferFromHook;
@@ -26,6 +28,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     IApproveHook public approveHook;
     ISetApprovalForAllHook public setApprovalForAllHook;
     IGetApprovedHook public getApprovedHook;
+    IIsApprovedForAllHook public isApprovedForAllHook;
 
     /// @notice Contract constructor
     /// @param _contractName The name for the token contract
@@ -128,8 +131,15 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         address owner,
         address operator
     ) public view virtual override returns (bool) {
-        if (_useIsApprovedForAllHook(owner, operator)) {
-            return _isApprovedForAllHook(owner, operator);
+        if (
+            address(isApprovedForAllHook) != address(0) &&
+            isApprovedForAllHook.useIsApprovedForAllHook(owner, operator)
+        ) {
+            return
+                isApprovedForAllHook.isApprovedForAllOverrideHook(
+                    owner,
+                    operator
+                );
         }
         return super.isApprovedForAll(owner, operator);
     }
@@ -279,6 +289,14 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     ) external virtual onlyOwner {
         getApprovedHook = _hook;
         emit UpdatedHookGetApproved(msg.sender, address(_hook));
+    }
+
+    /// TODO
+    function setIsApprovedForAllHook(
+        IIsApprovedForAllHook _hook
+    ) external virtual onlyOwner {
+        isApprovedForAllHook = _hook;
+        emit UpdatedHookIsApprovedForAll(msg.sender, address(_hook));
     }
 
     /// TODO
