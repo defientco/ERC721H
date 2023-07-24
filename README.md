@@ -17,13 +17,16 @@
 
 ### Admin capabilities
 
-- manage hooks
+- owner can manage hooks
+- `_requireCallerIsContractOwner` - override to set custom rules for ownership.
 
 ### TODO
 
-- fix failing unit tests in Github actions
+- finish setting up `IMethodHooks.sol`
+- calculate gas costs (Minting / Contract Deployment / Transfers) compared to ERC721A
+- Migrate Staking to Hooks
+- Subscription for Hooks ([ERC5643](https://eips.ethereum.org/EIPS/eip-5643))
+- NATSPEC docs (TODOs)
 - ERC721AH
 - ERC721CH
-- initial README
-- `IHookManager.sol`
-- `IHook.sol`
+- update README
