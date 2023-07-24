@@ -15,10 +15,8 @@ contract OwnerOfHookTest is DSTest {
     OwnerOfHookMock hookMock;
 
     function setUp() public {
-        vm.startPrank(DEFAULT_OWNER_ADDRESS);
-        erc721Mock = new ERC721ACHMock();
+        erc721Mock = new ERC721ACHMock(DEFAULT_OWNER_ADDRESS);
         hookMock = new OwnerOfHookMock();
-        vm.stopPrank();
     }
 
     function test_ownerOfHook() public {
