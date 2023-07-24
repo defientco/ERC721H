@@ -30,37 +30,27 @@ contract IsApprovedForAllHookTest is DSTest {
         assertEq(address(hookMock), address(erc721Mock.isApprovedForAllHook()));
     }
 
-    function test_isApprovedForAll(uint256 _mintQuantity) public {
+    function test_isApprovedForAll(
+        uint256 _mintQuantity,
+        address buyer
+    ) public {
         vm.assume(_mintQuantity > 0);
         vm.assume(_mintQuantity < 10_000);
+        vm.assume(buyer != address(0));
+        vm.assume(buyer != DEFAULT_OWNER_ADDRESS);
 
         // Mint some tokens first
-        erc721Mock.mint(DEFAULT_BUYER_ADDRESS, _mintQuantity);
+        erc721Mock.mint(buyer, _mintQuantity);
 
         // Verify normal functionality
-        assertTrue(
-            !erc721Mock.isApprovedForAll(
-                DEFAULT_BUYER_ADDRESS,
-                DEFAULT_OWNER_ADDRESS
-            )
-        );
-        vm.prank(DEFAULT_BUYER_ADDRESS);
+        assertTrue(!erc721Mock.isApprovedForAll(buyer, DEFAULT_OWNER_ADDRESS));
+        vm.prank(buyer);
         erc721Mock.setApprovalForAll(DEFAULT_OWNER_ADDRESS, true);
-        assertTrue(
-            erc721Mock.isApprovedForAll(
-                DEFAULT_BUYER_ADDRESS,
-                DEFAULT_OWNER_ADDRESS
-            )
-        );
+        assertTrue(erc721Mock.isApprovedForAll(buyer, DEFAULT_OWNER_ADDRESS));
 
         // Verify hook override
         test_setIsApprovedForAllHook();
         hookMock.setHooksEnabled(true);
-        assertTrue(
-            !erc721Mock.isApprovedForAll(
-                DEFAULT_BUYER_ADDRESS,
-                DEFAULT_OWNER_ADDRESS
-            )
-        );
+        assertTrue(!erc721Mock.isApprovedForAll(buyer, DEFAULT_OWNER_ADDRESS));
     }
 }
