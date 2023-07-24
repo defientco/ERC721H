@@ -157,6 +157,25 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         uint256 tokenId,
         bytes memory data
     ) public payable virtual override {
+        _safeTransferFrom(from, to, tokenId, data);
+    }
+
+    /// @inheritdoc IERC721A
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public payable virtual override {
+        _safeTransferFrom(from, to, tokenId, "");
+    }
+
+    /// TODO
+    function _safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory data
+    ) internal {
         if (
             address(safeTransferFromHook) != address(0) &&
             safeTransferFromHook.useSafeTransferFromHook(
@@ -176,34 +195,6 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
             );
         } else {
             super.safeTransferFrom(from, to, tokenId, data);
-        }
-    }
-
-    /// @inheritdoc IERC721A
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) public payable virtual override {
-        if (
-            address(safeTransferFromHook) != address(0) &&
-            safeTransferFromHook.useSafeTransferFromHook(
-                msg.sender,
-                from,
-                to,
-                tokenId,
-                ""
-            )
-        ) {
-            safeTransferFromHook.safeTransferFromOverrideHook(
-                msg.sender,
-                from,
-                to,
-                tokenId,
-                ""
-            );
-        } else {
-            super.safeTransferFrom(from, to, tokenId);
         }
     }
 
