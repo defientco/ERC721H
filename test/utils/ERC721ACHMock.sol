@@ -15,8 +15,6 @@ contract ERC721ACHMock is ERC721ACH {
     error ApproveHook_Executed();
     /// @notice error to verify setApprovalForAll hook was executed
     error SetApprovalForAllHook_Executed();
-    /// @notice error to transferFrom approve hook was executed
-    error TransferFromHook_Executed();
 
     function mint(address to, uint256 quantity) external {
         _mint(to, quantity);
@@ -47,14 +45,6 @@ contract ERC721ACHMock is ERC721ACH {
         bool
     ) internal virtual override {
         revert SetApprovalForAllHook_Executed();
-    }
-
-    function _transferFromHook(
-        address,
-        address,
-        uint256
-    ) internal virtual override {
-        revert TransferFromHook_Executed();
     }
 
     /////////////////////////////////////////////////
@@ -88,14 +78,6 @@ contract ERC721ACHMock is ERC721ACH {
     function _useIsApprovedForAllHook(
         address,
         address
-    ) internal view virtual override returns (bool) {
-        return hooksEnabled;
-    }
-
-    function _useTransferFromHook(
-        address,
-        address,
-        uint256
     ) internal view virtual override returns (bool) {
         return hooksEnabled;
     }
