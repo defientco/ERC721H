@@ -4,6 +4,9 @@ pragma solidity ^0.8.15;
 import {IApproveHook} from "../../../src/interfaces/IApproveHook.sol";
 
 contract ApproveHookMock is IApproveHook {
+    /// @notice approve hook was executed
+    error ApproveHook_Executed();
+
     bool public hooksEnabled;
 
     /// @notice toggle approve hook.
@@ -24,5 +27,7 @@ contract ApproveHookMock is IApproveHook {
     function approveOverrideHook(
         address,
         uint256
-    ) external view override returns (uint256) {}
+    ) external view override returns (uint256) {
+        revert ApproveHook_Executed();
+    }
 }

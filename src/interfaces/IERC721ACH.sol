@@ -11,7 +11,7 @@ interface IERC721ACH {
     /// @notice error onlyOwner
     error Access_OnlyOwner();
 
-    /// @notice Emitted when balanceOf hook is used
+    /// @notice Emitted when balanceOf hook is set
     /// @param caller The caller
     /// @param hook The new hook
     event UpdatedHookBalanceOf(address indexed caller, address indexed hook);
