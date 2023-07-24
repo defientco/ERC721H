@@ -5,7 +5,7 @@ import {Vm} from "forge-std/Vm.sol";
 import {DSTest} from "ds-test/test.sol";
 import {ERC721ACHMock} from "../utils/ERC721ACHMock.sol";
 import {IERC721A} from "lib/ERC721A/contracts/IERC721A.sol";
-import {ApproveHookMock} from "../utils/Hooks/ApproveHookMock.sol";
+import {ApproveHookMock} from "../utils/hooks/ApproveHookMock.sol";
 
 contract ApproveHookTest is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);
