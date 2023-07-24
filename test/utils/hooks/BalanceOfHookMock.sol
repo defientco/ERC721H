@@ -4,7 +4,7 @@ pragma solidity ^0.8.15;
 import {IBalanceOfHook} from "../../../src/interfaces/IBalanceOfHook.sol";
 
 contract BalanceOfHookMock is IBalanceOfHook {
-    bool hooksEnabled;
+    bool public hooksEnabled;
 
     /// @notice toggle balanceOf hook.
     function setHooksEnabled(bool _enabled) public {

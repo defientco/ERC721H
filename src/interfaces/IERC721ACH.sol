@@ -14,4 +14,12 @@ interface IERC721ACH {
     /// @param caller The caller
     /// @param hook The new hook
     event UpdatedHook_OwnerOf(address indexed caller, address indexed hook);
+
+    /// @notice Emitted when safeTransferFrom hook is set
+    /// @param caller The caller
+    /// @param hook The new hook
+    event UpdatedHook_SafeTransferFrom(
+        address indexed caller,
+        address indexed hook
+    );
 }
