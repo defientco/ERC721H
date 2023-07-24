@@ -6,6 +6,7 @@ import {IERC721A} from "erc721a/contracts/IERC721A.sol";
 import {IBalanceOfHook} from "./interfaces/IBalanceOfHook.sol";
 import {IOwnerOfHook} from "./interfaces/IOwnerOfHook.sol";
 import {ISafeTransferFromHook} from "./interfaces/ISafeTransferFromHook.sol";
+import {ITransferFromHook} from "./interfaces/ITransferFromHook.sol";
 import {IERC721ACH} from "./interfaces/IERC721ACH.sol";
 
 /**
@@ -43,6 +44,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     IBalanceOfHook public balanceOfHook;
     IOwnerOfHook public ownerOfHook;
     ISafeTransferFromHook public safeTransferFromHook;
+    ITransferFromHook public transferFromHook;
 
     /// @notice Contract constructor
     /// @param _contractName The name for the token contract
@@ -142,9 +144,11 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         address to,
         uint256 tokenId
     ) public payable virtual override {
-        if (_useTransferFromHook(from, to, tokenId)) {
-            emit TransferFromHookUsed(from, to, tokenId);
-            _transferFromHook(from, to, tokenId);
+        if (
+            address(transferFromHook) != address(0) &&
+            transferFromHook.useTransferFromHook(from, to, tokenId)
+        ) {
+            transferFromHook.transferFromOverrideHook(from, to, tokenId);
         } else {
             super.transferFrom(from, to, tokenId);
         }
@@ -319,6 +323,14 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     ) external virtual onlyOwner {
         safeTransferFromHook = _hook;
         emit UpdatedHookSafeTransferFrom(msg.sender, address(_hook));
+    }
+
+    /// TODO
+    function setTransferFromHook(
+        ITransferFromHook _hook
+    ) external virtual onlyOwner {
+        transferFromHook = _hook;
+        emit UpdatedHookTransferFrom(msg.sender, address(_hook));
     }
 
     /// TODO
