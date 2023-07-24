@@ -52,9 +52,10 @@ contract ApproveHookTest is DSTest {
         );
 
         // Verify hook override
-        // hookMock.setHooksEnabled(true);
-        // vm.expectRevert(ERC721ACHMock.ApproveHook_Executed.selector);
-        // vm.prank(DEFAULT_BUYER_ADDRESS);
-        // erc721Mock.approve(DEFAULT_OWNER_ADDRESS, _tokenToApprove);
+        test_setApproveHook();
+        hookMock.setHooksEnabled(true);
+        vm.expectRevert(ApproveHookMock.ApproveHook_Executed.selector);
+        vm.prank(DEFAULT_BUYER_ADDRESS);
+        erc721Mock.approve(DEFAULT_OWNER_ADDRESS, _tokenToApprove);
     }
 }

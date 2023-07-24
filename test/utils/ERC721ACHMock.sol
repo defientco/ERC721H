@@ -11,8 +11,6 @@ contract ERC721ACHMock is ERC721ACH {
         owner = _owner;
     }
 
-    /// @notice error to verify approve hook was executed
-    error ApproveHook_Executed();
     /// @notice error to verify setApprovalForAll hook was executed
     error SetApprovalForAllHook_Executed();
 
