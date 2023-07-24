@@ -5,6 +5,16 @@ import {Vm} from "forge-std/Vm.sol";
 import {DSTest} from "ds-test/test.sol";
 import {ERC721ACHMock} from "./utils/ERC721ACHMock.sol";
 import {IERC721A} from "lib/ERC721A/contracts/IERC721A.sol";
+import {BalanceOfHookTest} from "./hooks/BalanceOfHook.t.sol";
+import {IBalanceOfHook} from "../src/interfaces/IBalanceOfHook.sol";
+import {IOwnerOfHook} from "../src/interfaces/IOwnerOfHook.sol";
+import {ISafeTransferFromHook} from "../src/interfaces/ISafeTransferFromHook.sol";
+import {ITransferFromHook} from "../src/interfaces/ITransferFromHook.sol";
+import {IApproveHook} from "../src/interfaces/IApproveHook.sol";
+import {ISetApprovalForAllHook} from "../src/interfaces/ISetApprovalForAllHook.sol";
+import {IGetApprovedHook} from "../src/interfaces/IGetApprovedHook.sol";
+import {IIsApprovedForAllHook} from "../src/interfaces/IIsApprovedForAllHook.sol";
+import {IERC721ACH} from "../src/interfaces/IERC721ACH.sol";
 
 contract ERC721ACHTest is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);
@@ -14,7 +24,7 @@ contract ERC721ACHTest is DSTest {
 
     function setUp() public {
         vm.startPrank(DEFAULT_OWNER_ADDRESS);
-        erc721Mock = new ERC721ACHMock();
+        erc721Mock = new ERC721ACHMock(DEFAULT_OWNER_ADDRESS);
         vm.stopPrank();
     }
 
@@ -23,241 +33,115 @@ contract ERC721ACHTest is DSTest {
         assertEq("MOCK", erc721Mock.symbol());
     }
 
-    function test_balanceOf(uint256 _mintQuantity) public {
-        vm.assume(_mintQuantity > 0);
-        vm.assume(_mintQuantity < 10_000);
-
-        // Verify normal functionality
-        assertEq(0, erc721Mock.balanceOf(DEFAULT_BUYER_ADDRESS));
-        erc721Mock.mint(DEFAULT_BUYER_ADDRESS, _mintQuantity);
-        assertEq(_mintQuantity, erc721Mock.balanceOf(DEFAULT_BUYER_ADDRESS));
-
-        // Verify hook override
-        erc721Mock.setHooksEnabled(true);
-        assertEq(0, erc721Mock.balanceOf(DEFAULT_BUYER_ADDRESS));
-    }
-
-    function test_ownerOf(uint256 _mintQuantity) public {
-        vm.assume(_mintQuantity > 0);
-        vm.assume(_mintQuantity < 10_000);
-
-        // Verify normal functionality
-        vm.expectRevert(IERC721A.OwnerQueryForNonexistentToken.selector);
-        assertEq(erc721Mock.ownerOf(_mintQuantity), address(0));
-        erc721Mock.mint(DEFAULT_BUYER_ADDRESS, _mintQuantity);
-        assertEq(DEFAULT_BUYER_ADDRESS, erc721Mock.ownerOf(_mintQuantity));
-
-        // Verify hook override
-        erc721Mock.setHooksEnabled(true);
-        assertEq(erc721Mock.ownerOf(_mintQuantity), address(0));
-    }
-
-    function test_approve(
-        uint256 _mintQuantity,
-        uint256 _tokenToApprove
-    ) public {
-        vm.assume(_mintQuantity > 0);
-        vm.assume(_tokenToApprove > 0);
-        vm.assume(_mintQuantity < 10_000);
-        vm.assume(_tokenToApprove <= _mintQuantity);
-
-        // Mint some tokens first
-        erc721Mock.mint(DEFAULT_BUYER_ADDRESS, _mintQuantity);
-
-        // Verify normal functionality
-        assertEq(address(0), erc721Mock.getApproved(_tokenToApprove));
-        vm.prank(DEFAULT_BUYER_ADDRESS);
-        erc721Mock.approve(DEFAULT_OWNER_ADDRESS, _tokenToApprove);
+    function test_balanceOfHook(address hook, address caller) public {
+        assertEq(address(0), address(erc721Mock.balanceOfHook()));
+        bool isOwner = caller == DEFAULT_OWNER_ADDRESS;
+        vm.prank(caller);
+        if (!isOwner) {
+            vm.expectRevert(IERC721ACH.Access_OnlyOwner.selector);
+        }
+        erc721Mock.setBalanceOfHook(IBalanceOfHook(hook));
         assertEq(
-            DEFAULT_OWNER_ADDRESS,
-            erc721Mock.getApproved(_tokenToApprove)
-        );
-
-        // Verify hook override
-        erc721Mock.setHooksEnabled(true);
-        vm.expectRevert(ERC721ACHMock.ApproveHook_Executed.selector);
-        vm.prank(DEFAULT_BUYER_ADDRESS);
-        erc721Mock.approve(DEFAULT_OWNER_ADDRESS, _tokenToApprove);
-    }
-
-    function test_setApprovalForAll(uint256 _mintQuantity) public {
-        vm.assume(_mintQuantity > 0);
-        vm.assume(_mintQuantity < 10_000);
-
-        // Mint some tokens first
-        erc721Mock.mint(DEFAULT_BUYER_ADDRESS, _mintQuantity);
-
-        // Verify normal functionality
-        assertTrue(
-            !erc721Mock.isApprovedForAll(
-                DEFAULT_BUYER_ADDRESS,
-                DEFAULT_OWNER_ADDRESS
-            )
-        );
-        vm.prank(DEFAULT_BUYER_ADDRESS);
-        erc721Mock.setApprovalForAll(DEFAULT_OWNER_ADDRESS, true);
-        assertTrue(
-            erc721Mock.isApprovedForAll(
-                DEFAULT_BUYER_ADDRESS,
-                DEFAULT_OWNER_ADDRESS
-            )
-        );
-
-        // Verify hook override
-        erc721Mock.setHooksEnabled(true);
-        vm.expectRevert(ERC721ACHMock.SetApprovalForAllHook_Executed.selector);
-        vm.prank(DEFAULT_BUYER_ADDRESS);
-        erc721Mock.setApprovalForAll(DEFAULT_OWNER_ADDRESS, true);
-    }
-
-    function test_getApproved(uint256 _mintQuantity, uint256 _tokenId) public {
-        vm.assume(_tokenId > 0);
-        vm.assume(_mintQuantity > 0);
-        vm.assume(_mintQuantity < 10_000);
-        vm.assume(_mintQuantity >= _tokenId);
-
-        // Mint some tokens first
-        erc721Mock.mint(DEFAULT_BUYER_ADDRESS, _mintQuantity);
-
-        // Verify normal functionality
-        assertEq(address(0), erc721Mock.getApproved(_tokenId));
-        vm.prank(DEFAULT_BUYER_ADDRESS);
-        erc721Mock.approve(DEFAULT_OWNER_ADDRESS, _tokenId);
-        assertEq(DEFAULT_OWNER_ADDRESS, erc721Mock.getApproved(_tokenId));
-
-        // Verify hook override
-        erc721Mock.setHooksEnabled(true);
-        vm.prank(DEFAULT_BUYER_ADDRESS);
-        assertEq(address(0), erc721Mock.getApproved(_tokenId));
-    }
-
-    function test_isApprovedForAll(uint256 _mintQuantity) public {
-        vm.assume(_mintQuantity > 0);
-        vm.assume(_mintQuantity < 10_000);
-
-        // Mint some tokens first
-        erc721Mock.mint(DEFAULT_BUYER_ADDRESS, _mintQuantity);
-
-        // Verify normal functionality
-        assertTrue(
-            !erc721Mock.isApprovedForAll(
-                DEFAULT_BUYER_ADDRESS,
-                DEFAULT_OWNER_ADDRESS
-            )
-        );
-        vm.prank(DEFAULT_BUYER_ADDRESS);
-        erc721Mock.setApprovalForAll(DEFAULT_OWNER_ADDRESS, true);
-        assertTrue(
-            erc721Mock.isApprovedForAll(
-                DEFAULT_BUYER_ADDRESS,
-                DEFAULT_OWNER_ADDRESS
-            )
-        );
-
-        // Verify hook override
-        erc721Mock.setHooksEnabled(true);
-        assertTrue(
-            !erc721Mock.isApprovedForAll(
-                DEFAULT_BUYER_ADDRESS,
-                DEFAULT_OWNER_ADDRESS
-            )
+            isOwner ? hook : address(0),
+            address(erc721Mock.balanceOfHook())
         );
     }
 
-    function test_transferFrom(uint256 _mintQuantity, uint256 _tokenId) public {
-        vm.assume(_tokenId > 0);
-        vm.assume(_mintQuantity > 0);
-        vm.assume(_mintQuantity < 10_000);
-        vm.assume(_mintQuantity >= _tokenId);
-
-        // Mint some tokens first
-        erc721Mock.mint(DEFAULT_BUYER_ADDRESS, _mintQuantity);
-
-        // Verify normal functionality
-        assertEq(DEFAULT_BUYER_ADDRESS, erc721Mock.ownerOf(_tokenId));
-        vm.prank(DEFAULT_BUYER_ADDRESS);
-        erc721Mock.transferFrom(
-            DEFAULT_BUYER_ADDRESS,
-            DEFAULT_OWNER_ADDRESS,
-            _tokenId
-        );
-        assertEq(DEFAULT_OWNER_ADDRESS, erc721Mock.ownerOf(_tokenId));
-
-        // Verify hook override
-        erc721Mock.setHooksEnabled(true);
-        vm.expectRevert(ERC721ACHMock.TransferFromHook_Executed.selector);
-        vm.prank(DEFAULT_OWNER_ADDRESS);
-        erc721Mock.transferFrom(
-            DEFAULT_OWNER_ADDRESS,
-            DEFAULT_BUYER_ADDRESS,
-            _tokenId
+    function test_ownerOfHook(address hook, address caller) public {
+        assertEq(address(0), address(erc721Mock.ownerOfHook()));
+        bool isOwner = caller == DEFAULT_OWNER_ADDRESS;
+        vm.prank(caller);
+        if (!isOwner) {
+            vm.expectRevert(IERC721ACH.Access_OnlyOwner.selector);
+        }
+        erc721Mock.setOwnerOfHook(IOwnerOfHook(hook));
+        assertEq(
+            isOwner ? hook : address(0),
+            address(erc721Mock.ownerOfHook())
         );
     }
 
-    function test_safeTransferFrom_WithData(
-        uint256 _mintQuantity,
-        uint256 _tokenId,
-        bytes memory data
-    ) public {
-        vm.assume(_mintQuantity > 0);
-        vm.assume(_tokenId > 0);
-        vm.assume(_mintQuantity < 10_000);
-        vm.assume(_mintQuantity >= _tokenId);
-
-        // Mint some tokens first
-        erc721Mock.mint(DEFAULT_BUYER_ADDRESS, _mintQuantity);
-
-        // Verify normal functionality
-        vm.prank(DEFAULT_BUYER_ADDRESS);
-        erc721Mock.safeTransferFrom(
-            DEFAULT_BUYER_ADDRESS,
-            DEFAULT_OWNER_ADDRESS,
-            _tokenId,
-            data
-        );
-        assertEq(DEFAULT_OWNER_ADDRESS, erc721Mock.ownerOf(_tokenId));
-
-        // Verify hook override
-        erc721Mock.setHooksEnabled(true);
-        vm.expectRevert(ERC721ACHMock.SafeTransferFromHook_Executed.selector);
-        vm.prank(DEFAULT_BUYER_ADDRESS);
-        erc721Mock.safeTransferFrom(
-            DEFAULT_BUYER_ADDRESS,
-            DEFAULT_OWNER_ADDRESS,
-            _tokenId,
-            data
+    function test_safeTransferFromHook(address hook, address caller) public {
+        assertEq(address(0), address(erc721Mock.safeTransferFromHook()));
+        bool isOwner = caller == DEFAULT_OWNER_ADDRESS;
+        vm.prank(caller);
+        if (!isOwner) {
+            vm.expectRevert(IERC721ACH.Access_OnlyOwner.selector);
+        }
+        erc721Mock.setSafeTransferFromHook(ISafeTransferFromHook(hook));
+        assertEq(
+            isOwner ? hook : address(0),
+            address(erc721Mock.safeTransferFromHook())
         );
     }
 
-    function test_safeTransferFrom_WithoutData(
-        uint256 _mintQuantity,
-        uint256 _tokenId
-    ) public {
-        vm.assume(_tokenId > 0);
-        vm.assume(_mintQuantity > 0);
-        vm.assume(_mintQuantity < 10_000);
-        vm.assume(_mintQuantity >= _tokenId);
-
-        // Mint some tokens first
-        erc721Mock.mint(DEFAULT_BUYER_ADDRESS, _mintQuantity);
-
-        // Verify normal functionality
-        vm.prank(DEFAULT_BUYER_ADDRESS);
-        erc721Mock.safeTransferFrom(
-            DEFAULT_BUYER_ADDRESS,
-            DEFAULT_OWNER_ADDRESS,
-            _tokenId
+    function test_transferFromHook(address hook, address caller) public {
+        assertEq(address(0), address(erc721Mock.transferFromHook()));
+        bool isOwner = caller == DEFAULT_OWNER_ADDRESS;
+        vm.prank(caller);
+        if (!isOwner) {
+            vm.expectRevert(IERC721ACH.Access_OnlyOwner.selector);
+        }
+        erc721Mock.setTransferFromHook(ITransferFromHook(hook));
+        assertEq(
+            isOwner ? hook : address(0),
+            address(erc721Mock.transferFromHook())
         );
-        assertEq(DEFAULT_OWNER_ADDRESS, erc721Mock.ownerOf(_tokenId));
+    }
 
-        // Verify hook override
-        erc721Mock.setHooksEnabled(true);
-        vm.expectRevert(ERC721ACHMock.SafeTransferFromHook_Executed.selector);
-        vm.prank(DEFAULT_BUYER_ADDRESS);
-        erc721Mock.safeTransferFrom(
-            DEFAULT_BUYER_ADDRESS,
-            DEFAULT_OWNER_ADDRESS,
-            _tokenId
+    function test_approveHook(address hook, address caller) public {
+        assertEq(address(0), address(erc721Mock.approveHook()));
+        bool isOwner = caller == DEFAULT_OWNER_ADDRESS;
+        vm.prank(caller);
+        if (!isOwner) {
+            vm.expectRevert(IERC721ACH.Access_OnlyOwner.selector);
+        }
+        erc721Mock.setApproveHook(IApproveHook(hook));
+        assertEq(
+            isOwner ? hook : address(0),
+            address(erc721Mock.approveHook())
+        );
+    }
+
+    function test_setApprovalForAllHook(address hook, address caller) public {
+        assertEq(address(0), address(erc721Mock.setApprovalForAllHook()));
+        bool isOwner = caller == DEFAULT_OWNER_ADDRESS;
+        vm.prank(caller);
+        if (!isOwner) {
+            vm.expectRevert(IERC721ACH.Access_OnlyOwner.selector);
+        }
+        erc721Mock.setSetApprovalForAllHook(ISetApprovalForAllHook(hook));
+        assertEq(
+            isOwner ? hook : address(0),
+            address(erc721Mock.setApprovalForAllHook())
+        );
+    }
+
+    function test_getApprovedHook(address hook, address caller) public {
+        assertEq(address(0), address(erc721Mock.getApprovedHook()));
+        bool isOwner = caller == DEFAULT_OWNER_ADDRESS;
+        vm.prank(caller);
+        if (!isOwner) {
+            vm.expectRevert(IERC721ACH.Access_OnlyOwner.selector);
+        }
+        erc721Mock.setGetApprovedHook(IGetApprovedHook(hook));
+        assertEq(
+            isOwner ? hook : address(0),
+            address(erc721Mock.getApprovedHook())
+        );
+    }
+
+    function test_isApprovedForAllHook(address hook, address caller) public {
+        assertEq(address(0), address(erc721Mock.isApprovedForAllHook()));
+        bool isOwner = caller == DEFAULT_OWNER_ADDRESS;
+        vm.prank(caller);
+        if (!isOwner) {
+            vm.expectRevert(IERC721ACH.Access_OnlyOwner.selector);
+        }
+        erc721Mock.setIsApprovedForAllHook(IIsApprovedForAllHook(hook));
+        assertEq(
+            isOwner ? hook : address(0),
+            address(erc721Mock.isApprovedForAllHook())
         );
     }
 }
