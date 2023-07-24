@@ -4,6 +4,8 @@ pragma solidity ^0.8.15;
 import {IBalanceOfHook} from "./IBalanceOfHook.sol";
 import {IOwnerOfHook} from "./IOwnerOfHook.sol";
 import {ISafeTransferFromHook} from "./ISafeTransferFromHook.sol";
+import {ITransferFromHook} from "./ITransferFromHook.sol";
+import {IApproveHook} from "./IApproveHook.sol";
 
 interface IERC721ACH {
     /// @notice error onlyOwner
@@ -32,6 +34,11 @@ interface IERC721ACH {
     /// @param hook The new hook
     event UpdatedHookTransferFrom(address indexed caller, address indexed hook);
 
+    /// @notice Emitted when approve hook is set
+    /// @param caller The caller
+    /// @param hook The new hook
+    event UpdatedHookApprove(address indexed caller, address indexed hook);
+
     /// TODO
     function setBalanceOfHook(IBalanceOfHook _hook) external;
 
@@ -40,4 +47,10 @@ interface IERC721ACH {
 
     /// TODO
     function setSafeTransferFromHook(ISafeTransferFromHook _hook) external;
+
+    /// TODO
+    function setTransferFromHook(ITransferFromHook _hook) external;
+
+    /// TODO
+    function setApproveHook(IApproveHook _hook) external;
 }
