@@ -5,7 +5,7 @@ import {Vm} from "forge-std/Vm.sol";
 import {DSTest} from "ds-test/test.sol";
 import {ERC721ACHMock} from "../utils/ERC721ACHMock.sol";
 import {IERC721A} from "lib/ERC721A/contracts/IERC721A.sol";
-import {OwnerOfHookMock} from "../utils/Hooks/OwnerOfHookMock.sol";
+import {OwnerOfHookMock} from "../utils/hooks/OwnerOfHookMock.sol";
 
 contract OwnerOfHookTest is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);
