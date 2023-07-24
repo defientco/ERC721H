@@ -4,7 +4,7 @@ pragma solidity ^0.8.15;
 import {IOwnerOfHook} from "../../../src/interfaces/IOwnerOfHook.sol";
 
 contract OwnerOfHookMock is IOwnerOfHook {
-    bool hooksEnabled;
+    bool public hooksEnabled;
 
     /// @notice toggle balanceOf hook.
     function setHooksEnabled(bool _enabled) public {

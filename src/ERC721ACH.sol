@@ -5,6 +5,7 @@ import {ERC721AC} from "ERC721C/erc721c/ERC721AC.sol";
 import {IERC721A} from "erc721a/contracts/IERC721A.sol";
 import {IBalanceOfHook} from "./interfaces/IBalanceOfHook.sol";
 import {IOwnerOfHook} from "./interfaces/IOwnerOfHook.sol";
+import {ISafeTransferFromHook} from "./interfaces/ISafeTransferFromHook.sol";
 import {IERC721ACH} from "./interfaces/IERC721ACH.sol";
 
 /**
@@ -39,22 +40,9 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         uint256 indexed tokenId
     );
 
-    /// @notice Emitted when safeTransferFrom hook is used
-    /// @param sender The sender of the token
-    /// @param from The current owner of the token
-    /// @param to The receiver of the token
-    /// @param tokenId The ID of the token
-    /// @param data Additional data
-    event SafeTransferFromHookUsed(
-        address indexed sender,
-        address indexed from,
-        address indexed to,
-        uint256 tokenId,
-        bytes data
-    );
-
     IBalanceOfHook public balanceOfHook;
     IOwnerOfHook public ownerOfHook;
+    ISafeTransferFromHook public safeTransferFromHook;
 
     /// @notice Contract constructor
     /// @param _contractName The name for the token contract
@@ -169,9 +157,23 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         uint256 tokenId,
         bytes memory data
     ) public payable virtual override {
-        if (_useSafeTransferFromHook(msg.sender, from, to, tokenId, data)) {
-            emit SafeTransferFromHookUsed(msg.sender, from, to, tokenId, data);
-            _safeTransferFromHook(msg.sender, from, to, tokenId, data);
+        if (
+            address(safeTransferFromHook) != address(0) &&
+            safeTransferFromHook.useSafeTransferFromHook(
+                msg.sender,
+                from,
+                to,
+                tokenId,
+                data
+            )
+        ) {
+            safeTransferFromHook.safeTransferFromOverrideHook(
+                msg.sender,
+                from,
+                to,
+                tokenId,
+                data
+            );
         } else {
             super.safeTransferFrom(from, to, tokenId, data);
         }
@@ -183,9 +185,23 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         address to,
         uint256 tokenId
     ) public payable virtual override {
-        if (_useSafeTransferFromHook(msg.sender, from, to, tokenId, "")) {
-            emit SafeTransferFromHookUsed(msg.sender, from, to, tokenId, "");
-            _safeTransferFromHook(msg.sender, from, to, tokenId, "");
+        if (
+            address(safeTransferFromHook) != address(0) &&
+            safeTransferFromHook.useSafeTransferFromHook(
+                msg.sender,
+                from,
+                to,
+                tokenId,
+                ""
+            )
+        ) {
+            safeTransferFromHook.safeTransferFromOverrideHook(
+                msg.sender,
+                from,
+                to,
+                tokenId,
+                ""
+            );
         } else {
             super.safeTransferFrom(from, to, tokenId);
         }
@@ -283,35 +299,6 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         uint256 tokenId
     ) internal view virtual returns (bool) {}
 
-    /// @notice safeTransferFrom Hook for custom implementation.
-    /// @param sender The address which calls `safeTransferFrom`
-    /// @param from The current owner of the NFT
-    /// @param to The new owner
-    /// @param tokenId The NFT to transfer
-    /// @param data Additional data with no specified format, sent in call to `to`
-    function _safeTransferFromHook(
-        address sender,
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes memory data
-    ) internal virtual {}
-
-    /// @notice Check if the safeTransferFrom function should use hook.
-    /// @param sender The address which calls `safeTransferFrom`
-    /// @param from The current owner of the NFT
-    /// @param to The new owner
-    /// @param tokenId The NFT to transfer
-    /// @param data Additional data with no specified format, sent in call to `to`
-    /// @dev Returns whether or not to use the hook for safeTransferFrom function
-    function _useSafeTransferFromHook(
-        address sender,
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes memory data
-    ) internal view virtual returns (bool) {}
-
     /////////////////////////////////////////////////
     /// ERC721C Override
     /////////////////////////////////////////////////
@@ -331,6 +318,13 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     function setOwnerOfHook(IOwnerOfHook _hook) external virtual onlyOwner {
         ownerOfHook = _hook;
         emit UpdatedHook_OwnerOf(msg.sender, address(_hook));
+    }
+
+    function setSafeTransferFromHook(
+        ISafeTransferFromHook _hook
+    ) external virtual onlyOwner {
+        safeTransferFromHook = _hook;
+        emit UpdatedHook_SafeTransferFrom(msg.sender, address(_hook));
     }
 
     modifier onlyOwner() {

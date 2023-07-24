@@ -8,6 +8,7 @@ import {IERC721A} from "lib/ERC721A/contracts/IERC721A.sol";
 import {BalanceOfHookTest} from "./hooks/BalanceOfHook.t.sol";
 import {IBalanceOfHook} from "../src/interfaces/IBalanceOfHook.sol";
 import {IOwnerOfHook} from "../src/interfaces/IOwnerOfHook.sol";
+import {ISafeTransferFromHook} from "../src/interfaces/ISafeTransferFromHook.sol";
 import {IERC721ACH} from "../src/interfaces/IERC721ACH.sol";
 
 contract ERC721ACHTest is DSTest {
@@ -52,6 +53,20 @@ contract ERC721ACHTest is DSTest {
         assertEq(
             isOwner ? hook : address(0),
             address(erc721Mock.ownerOfHook())
+        );
+    }
+
+    function test_safeTransferFromHook(address hook, address caller) public {
+        assertEq(address(0), address(erc721Mock.safeTransferFromHook()));
+        bool isOwner = caller == DEFAULT_OWNER_ADDRESS;
+        vm.prank(caller);
+        if (!isOwner) {
+            vm.expectRevert(IERC721ACH.Access_OnlyOwner.selector);
+        }
+        erc721Mock.setSafeTransferFromHook(ISafeTransferFromHook(hook));
+        assertEq(
+            isOwner ? hook : address(0),
+            address(erc721Mock.safeTransferFromHook())
         );
     }
 
@@ -193,73 +208,6 @@ contract ERC721ACHTest is DSTest {
         erc721Mock.transferFrom(
             DEFAULT_OWNER_ADDRESS,
             DEFAULT_BUYER_ADDRESS,
-            _tokenId
-        );
-    }
-
-    function test_safeTransferFrom_WithData(
-        uint256 _mintQuantity,
-        uint256 _tokenId,
-        bytes memory data
-    ) public {
-        vm.assume(_mintQuantity > 0);
-        vm.assume(_tokenId > 0);
-        vm.assume(_mintQuantity < 10_000);
-        vm.assume(_mintQuantity >= _tokenId);
-
-        // Mint some tokens first
-        erc721Mock.mint(DEFAULT_BUYER_ADDRESS, _mintQuantity);
-
-        // Verify normal functionality
-        vm.prank(DEFAULT_BUYER_ADDRESS);
-        erc721Mock.safeTransferFrom(
-            DEFAULT_BUYER_ADDRESS,
-            DEFAULT_OWNER_ADDRESS,
-            _tokenId,
-            data
-        );
-        assertEq(DEFAULT_OWNER_ADDRESS, erc721Mock.ownerOf(_tokenId));
-
-        // Verify hook override
-        erc721Mock.setHooksEnabled(true);
-        vm.expectRevert(ERC721ACHMock.SafeTransferFromHook_Executed.selector);
-        vm.prank(DEFAULT_BUYER_ADDRESS);
-        erc721Mock.safeTransferFrom(
-            DEFAULT_BUYER_ADDRESS,
-            DEFAULT_OWNER_ADDRESS,
-            _tokenId,
-            data
-        );
-    }
-
-    function test_safeTransferFrom_WithoutData(
-        uint256 _mintQuantity,
-        uint256 _tokenId
-    ) public {
-        vm.assume(_tokenId > 0);
-        vm.assume(_mintQuantity > 0);
-        vm.assume(_mintQuantity < 10_000);
-        vm.assume(_mintQuantity >= _tokenId);
-
-        // Mint some tokens first
-        erc721Mock.mint(DEFAULT_BUYER_ADDRESS, _mintQuantity);
-
-        // Verify normal functionality
-        vm.prank(DEFAULT_BUYER_ADDRESS);
-        erc721Mock.safeTransferFrom(
-            DEFAULT_BUYER_ADDRESS,
-            DEFAULT_OWNER_ADDRESS,
-            _tokenId
-        );
-        assertEq(DEFAULT_OWNER_ADDRESS, erc721Mock.ownerOf(_tokenId));
-
-        // Verify hook override
-        erc721Mock.setHooksEnabled(true);
-        vm.expectRevert(ERC721ACHMock.SafeTransferFromHook_Executed.selector);
-        vm.prank(DEFAULT_BUYER_ADDRESS);
-        erc721Mock.safeTransferFrom(
-            DEFAULT_BUYER_ADDRESS,
-            DEFAULT_OWNER_ADDRESS,
             _tokenId
         );
     }
