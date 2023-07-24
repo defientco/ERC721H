@@ -7,6 +7,7 @@ import {IBalanceOfHook} from "./interfaces/IBalanceOfHook.sol";
 import {IOwnerOfHook} from "./interfaces/IOwnerOfHook.sol";
 import {ISafeTransferFromHook} from "./interfaces/ISafeTransferFromHook.sol";
 import {ITransferFromHook} from "./interfaces/ITransferFromHook.sol";
+import {IApproveHook} from "./interfaces/IApproveHook.sol";
 import {IERC721ACH} from "./interfaces/IERC721ACH.sol";
 
 /**
@@ -16,11 +17,6 @@ import {IERC721ACH} from "./interfaces/IERC721ACH.sol";
  *         allows the contract owner to override hooks associated with core ERC721 functions.
  */
 contract ERC721ACH is ERC721AC, IERC721ACH {
-    /// @notice Emitted when approve hook is used
-    /// @param approved The address that got approved
-    /// @param tokenId The token ID that got approved
-    event ApproveHookUsed(address indexed approved, uint256 indexed tokenId);
-
     /// @notice Emitted when setApprovalForAll hook is used
     /// @param owner The owner of the tokens
     /// @param operator The operator that got (dis)approved
@@ -35,6 +31,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     IOwnerOfHook public ownerOfHook;
     ISafeTransferFromHook public safeTransferFromHook;
     ITransferFromHook public transferFromHook;
+    IApproveHook public approveHook;
 
     /// @notice Contract constructor
     /// @param _contractName The name for the token contract
@@ -86,9 +83,11 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         address approved,
         uint256 tokenId
     ) public payable virtual override {
-        if (_useApproveHook(approved, tokenId)) {
-            emit ApproveHookUsed(approved, tokenId);
-            _approveHook(approved, tokenId);
+        if (
+            address(approveHook) != address(0) &&
+            approveHook.useApproveHook(approved, tokenId)
+        ) {
+            approveHook.approveOverrideHook(approved, tokenId);
         } else {
             super.approve(approved, tokenId);
         }
@@ -196,20 +195,6 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     /// ERC721 Hooks
     /////////////////////////////////////////////////
 
-    /// @notice approve Hook for custom implementation.
-    /// @param approved The address to be approved for the given token ID
-    /// @param tokenId The token ID to be approved
-    function _approveHook(address approved, uint256 tokenId) internal virtual {}
-
-    /// @notice Check if the approve function should use hook.
-    /// @param approved The address to be approved for the given token ID
-    /// @param tokenId The token ID to be approved
-    /// @dev Returns whether or not to use the hook for approve function
-    function _useApproveHook(
-        address approved,
-        uint256 tokenId
-    ) internal view virtual returns (bool) {}
-
     /// @notice setApprovalForAll Hook for custom implementation.
     /// @param owner The address to extend operators for
     /// @param operator The address to add to the set of authorized operators
@@ -300,6 +285,12 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     ) external virtual onlyOwner {
         transferFromHook = _hook;
         emit UpdatedHookTransferFrom(msg.sender, address(_hook));
+    }
+
+    /// TODO
+    function setApproveHook(IApproveHook _hook) external virtual onlyOwner {
+        approveHook = _hook;
+        emit UpdatedHookApprove(msg.sender, address(_hook));
     }
 
     /// TODO
