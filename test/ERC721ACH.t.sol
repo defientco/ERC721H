@@ -12,6 +12,7 @@ import {ISafeTransferFromHook} from "../src/interfaces/ISafeTransferFromHook.sol
 import {ITransferFromHook} from "../src/interfaces/ITransferFromHook.sol";
 import {IApproveHook} from "../src/interfaces/IApproveHook.sol";
 import {ISetApprovalForAllHook} from "../src/interfaces/ISetApprovalForAllHook.sol";
+import {IGetApprovedHook} from "../src/interfaces/IGetApprovedHook.sol";
 import {IERC721ACH} from "../src/interfaces/IERC721ACH.sol";
 
 contract ERC721ACHTest is DSTest {
@@ -112,6 +113,20 @@ contract ERC721ACHTest is DSTest {
         assertEq(
             isOwner ? hook : address(0),
             address(erc721Mock.setApprovalForAllHook())
+        );
+    }
+
+    function test_getApprovedHook(address hook, address caller) public {
+        assertEq(address(0), address(erc721Mock.getApprovedHook()));
+        bool isOwner = caller == DEFAULT_OWNER_ADDRESS;
+        vm.prank(caller);
+        if (!isOwner) {
+            vm.expectRevert(IERC721ACH.Access_OnlyOwner.selector);
+        }
+        erc721Mock.setGetApprovedHook(IGetApprovedHook(hook));
+        assertEq(
+            isOwner ? hook : address(0),
+            address(erc721Mock.getApprovedHook())
         );
     }
 
