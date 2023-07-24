@@ -25,6 +25,7 @@ contract BalanceOfHookTest is DSTest {
 
     function test_setBalanceOfHook() public {
         assertEq(address(0), address(erc721Mock.balanceOfHook()));
+        vm.prank(DEFAULT_OWNER_ADDRESS);
         erc721Mock.setBalanceOfHook(hookMock);
         assertEq(address(hookMock), address(erc721Mock.balanceOfHook()));
     }

@@ -30,6 +30,7 @@ contract ERC721ACHTest is DSTest {
     function test_balanceOfHook(address hook, address caller) public {
         assertEq(address(0), address(erc721Mock.balanceOfHook()));
         bool isOwner = caller == DEFAULT_OWNER_ADDRESS;
+        vm.prank(caller);
         if (!isOwner) {
             vm.expectRevert(IERC721ACH.Access_OnlyOwner.selector);
         }
@@ -43,6 +44,7 @@ contract ERC721ACHTest is DSTest {
     function test_ownerOfHook(address hook, address caller) public {
         assertEq(address(0), address(erc721Mock.ownerOfHook()));
         bool isOwner = caller == DEFAULT_OWNER_ADDRESS;
+        vm.prank(caller);
         if (!isOwner) {
             vm.expectRevert(IERC721ACH.Access_OnlyOwner.selector);
         }
