@@ -22,8 +22,10 @@
 
 ### TODO
 
-- finish setting up `IMethodHooks.sol`
-- optimize hook setting in `ERC721ACH.sol` (struct?)
+- add `before` & `after` hooks to ANY write methods.
+- add hooks for any missing functions in ERC721A.
+- add hooks for any missing functions in ERC721C.
+- optimize hook storage in `ERC721ACH.sol` (struct?)
 - calculate gas costs (Minting / Contract Deployment / Transfers) compared to ERC721A
 - Migrate Staking (`cre8ing.sol`) to Hooks
 - Subscription for Hooks ([ERC5643](https://eips.ethereum.org/EIPS/eip-5643))

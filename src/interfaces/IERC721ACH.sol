@@ -7,6 +7,8 @@ import {ISafeTransferFromHook} from "./ISafeTransferFromHook.sol";
 import {ITransferFromHook} from "./ITransferFromHook.sol";
 import {IApproveHook} from "./IApproveHook.sol";
 import {ISetApprovalForAllHook} from "./ISetApprovalForAllHook.sol";
+import {IGetApprovedHook} from "./IGetApprovedHook.sol";
+import {IIsApprovedForAllHook} from "./IIsApprovedForAllHook.sol";
 
 interface IERC721ACH {
     /// @notice error onlyOwner
@@ -78,4 +80,10 @@ interface IERC721ACH {
 
     /// TODO
     function setSetApprovalForAllHook(ISetApprovalForAllHook _hook) external;
+
+    /// TODO
+    function setGetApprovedHook(IGetApprovedHook _hook) external;
+
+    /// TODO
+    function setIsApprovedForAllHook(IIsApprovedForAllHook _hook) external;
 }
