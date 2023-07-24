@@ -25,6 +25,7 @@ contract OwnerOfHookTest is DSTest {
 
     function test_setOwnerOfHook() public {
         assertEq(address(0), address(erc721Mock.ownerOfHook()));
+        vm.prank(DEFAULT_OWNER_ADDRESS);
         erc721Mock.setOwnerOfHook(hookMock);
         assertEq(address(hookMock), address(erc721Mock.ownerOfHook()));
     }
