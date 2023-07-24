@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
 
+import {IBalanceOfHook} from "./IBalanceOfHook.sol";
+import {IOwnerOfHook} from "./IOwnerOfHook.sol";
+import {ISafeTransferFromHook} from "./ISafeTransferFromHook.sol";
+
 interface IERC721ACH {
     /// @notice error onlyOwner
     error Access_OnlyOwner();
@@ -8,18 +12,24 @@ interface IERC721ACH {
     /// @notice Emitted when balanceOf hook is used
     /// @param caller The caller
     /// @param hook The new hook
-    event UpdatedHook_BalanceOf(address indexed caller, address indexed hook);
+    event UpdatedHookBalanceOf(address indexed caller, address indexed hook);
 
     /// @notice Emitted when ownerOf hook is set
     /// @param caller The caller
     /// @param hook The new hook
-    event UpdatedHook_OwnerOf(address indexed caller, address indexed hook);
+    event UpdatedHookOwnerOf(address indexed caller, address indexed hook);
 
     /// @notice Emitted when safeTransferFrom hook is set
     /// @param caller The caller
     /// @param hook The new hook
-    event UpdatedHook_SafeTransferFrom(
+    event UpdatedHookSafeTransferFrom(
         address indexed caller,
         address indexed hook
     );
+
+    function setBalanceOfHook(IBalanceOfHook _hook) external;
+
+    function setOwnerOfHook(IOwnerOfHook _hook) external;
+
+    function setSafeTransferFromHook(ISafeTransferFromHook _hook) external;
 }
