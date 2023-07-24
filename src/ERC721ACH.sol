@@ -31,16 +31,6 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         bool approved
     );
 
-    /// @notice Emitted when transferFrom hook is used
-    /// @param from The sender of the token
-    /// @param to The receiver of the token
-    /// @param tokenId The ID of the token
-    event TransferFromHookUsed(
-        address indexed from,
-        address indexed to,
-        uint256 indexed tokenId
-    );
-
     IBalanceOfHook public balanceOfHook;
     IOwnerOfHook public ownerOfHook;
     ISafeTransferFromHook public safeTransferFromHook;
