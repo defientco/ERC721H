@@ -98,7 +98,11 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
                 approved
             )
         ) {
-            _setApprovalForAllHook(msg.sender, operator, approved);
+            setApprovalForAllHook.setApprovalForAllOverrideHook(
+                msg.sender,
+                operator,
+                approved
+            );
         } else {
             super.setApprovalForAll(operator, approved);
         }
@@ -192,27 +196,6 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     /////////////////////////////////////////////////
     /// ERC721 Hooks
     /////////////////////////////////////////////////
-
-    /// @notice setApprovalForAll Hook for custom implementation.
-    /// @param owner The address to extend operators for
-    /// @param operator The address to add to the set of authorized operators
-    /// @param approved True if the operator is approved, false to revoke approval
-    function _setApprovalForAllHook(
-        address owner,
-        address operator,
-        bool approved
-    ) internal virtual {}
-
-    /// @notice Check if the setApprovalForAll function should use hook.
-    /// @param owner The address to extend operators for
-    /// @param operator The address to add to the set of authorized operators
-    /// @param approved True if the operator is approved, false to revoke approval
-    /// @dev Returns whether or not to use the hook for setApprovalForAll function
-    function _useSetApprovalForAllHook(
-        address owner,
-        address operator,
-        bool approved
-    ) internal view virtual returns (bool) {}
 
     /// @notice getApproved Hook for custom implementation.
     /// @param tokenId The token ID to query the approval of

@@ -30,30 +30,10 @@ contract ERC721ACHMock is ERC721ACH {
     }
 
     /////////////////////////////////////////////////
-    /// Hooks
-    /////////////////////////////////////////////////
-
-    function _setApprovalForAllHook(
-        address,
-        address,
-        bool
-    ) internal virtual override {
-        revert SetApprovalForAllHook_Executed();
-    }
-
-    /////////////////////////////////////////////////
     /// Enable Hooks
     /////////////////////////////////////////////////
     function setHooksEnabled(bool _enabled) public {
         hooksEnabled = _enabled;
-    }
-
-    function _useSetApprovalForAllHook(
-        address,
-        address,
-        bool
-    ) internal view virtual override returns (bool) {
-        return hooksEnabled;
     }
 
     function _useGetApprovedHook(
