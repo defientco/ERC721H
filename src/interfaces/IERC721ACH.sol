@@ -2,6 +2,9 @@
 pragma solidity ^0.8.15;
 
 interface IERC721ACH {
+    /// @notice error onlyOwner
+    error Access_OnlyOwner();
+
     /// @notice Emitted when balanceOf hook is used
     /// @param caller The caller
     /// @param hook The new hook

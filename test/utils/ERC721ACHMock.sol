@@ -4,9 +4,12 @@ pragma solidity ^0.8.15;
 import {ERC721ACH} from "../../src/ERC721ACH.sol";
 
 contract ERC721ACHMock is ERC721ACH {
-    constructor() ERC721ACH("ERC-721ACH Mock", "MOCK") {}
+    bool public hooksEnabled;
+    address public owner;
 
-    bool hooksEnabled;
+    constructor(address _owner) ERC721ACH("ERC-721ACH Mock", "MOCK") {
+        owner = _owner;
+    }
 
     /// @notice error to verify approve hook was executed
     error ApproveHook_Executed();
@@ -27,6 +30,9 @@ contract ERC721ACHMock is ERC721ACH {
 
     function _requireCallerIsContractOwner() internal view override(ERC721ACH) {
         // Derived contract's implementation here
+        if (msg.sender != owner) {
+            revert Access_OnlyOwner();
+        }
     }
 
     /////////////////////////////////////////////////

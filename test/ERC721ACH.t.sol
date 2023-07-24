@@ -7,6 +7,8 @@ import {ERC721ACHMock} from "./utils/ERC721ACHMock.sol";
 import {IERC721A} from "lib/ERC721A/contracts/IERC721A.sol";
 import {BalanceOfHookTest} from "./hooks/BalanceOfHook.t.sol";
 import {IBalanceOfHook} from "../src/interfaces/IBalanceOfHook.sol";
+import {IOwnerOfHook} from "../src/interfaces/IOwnerOfHook.sol";
+import {IERC721ACH} from "../src/interfaces/IERC721ACH.sol";
 
 contract ERC721ACHTest is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);
@@ -16,7 +18,7 @@ contract ERC721ACHTest is DSTest {
 
     function setUp() public {
         vm.startPrank(DEFAULT_OWNER_ADDRESS);
-        erc721Mock = new ERC721ACHMock();
+        erc721Mock = new ERC721ACHMock(DEFAULT_OWNER_ADDRESS);
         vm.stopPrank();
     }
 
@@ -25,25 +27,30 @@ contract ERC721ACHTest is DSTest {
         assertEq("MOCK", erc721Mock.symbol());
     }
 
-    function test_balanceOfHook(address balanceOfHook) public {
+    function test_balanceOfHook(address hook, address caller) public {
         assertEq(address(0), address(erc721Mock.balanceOfHook()));
-        erc721Mock.setBalanceOfHook(IBalanceOfHook(balanceOfHook));
-        assertEq(balanceOfHook, address(erc721Mock.balanceOfHook()));
+        bool isOwner = caller == DEFAULT_OWNER_ADDRESS;
+        if (!isOwner) {
+            vm.expectRevert(IERC721ACH.Access_OnlyOwner.selector);
+        }
+        erc721Mock.setBalanceOfHook(IBalanceOfHook(hook));
+        assertEq(
+            isOwner ? hook : address(0),
+            address(erc721Mock.balanceOfHook())
+        );
     }
 
-    function test_ownerOf(uint256 _mintQuantity) public {
-        vm.assume(_mintQuantity > 0);
-        vm.assume(_mintQuantity < 10_000);
-
-        // Verify normal functionality
-        vm.expectRevert(IERC721A.OwnerQueryForNonexistentToken.selector);
-        assertEq(erc721Mock.ownerOf(_mintQuantity), address(0));
-        erc721Mock.mint(DEFAULT_BUYER_ADDRESS, _mintQuantity);
-        assertEq(DEFAULT_BUYER_ADDRESS, erc721Mock.ownerOf(_mintQuantity));
-
-        // Verify hook override
-        erc721Mock.setHooksEnabled(true);
-        assertEq(erc721Mock.ownerOf(_mintQuantity), address(0));
+    function test_ownerOfHook(address hook, address caller) public {
+        assertEq(address(0), address(erc721Mock.ownerOfHook()));
+        bool isOwner = caller == DEFAULT_OWNER_ADDRESS;
+        if (!isOwner) {
+            vm.expectRevert(IERC721ACH.Access_OnlyOwner.selector);
+        }
+        erc721Mock.setOwnerOfHook(IOwnerOfHook(hook));
+        assertEq(
+            isOwner ? hook : address(0),
+            address(erc721Mock.ownerOfHook())
+        );
     }
 
     function test_approve(

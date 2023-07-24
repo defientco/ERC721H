@@ -15,10 +15,8 @@ contract BalanceOfHookTest is DSTest {
     BalanceOfHookMock hookMock;
 
     function setUp() public {
-        vm.startPrank(DEFAULT_OWNER_ADDRESS);
-        erc721Mock = new ERC721ACHMock();
+        erc721Mock = new ERC721ACHMock(DEFAULT_OWNER_ADDRESS);
         hookMock = new BalanceOfHookMock();
-        vm.stopPrank();
     }
 
     function test_balanceOfHook() public {
