@@ -301,16 +301,19 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     /// ERC721H Admin Controls
     /////////////////////////////////////////////////
 
+    /// TODO
     function setBalanceOfHook(IBalanceOfHook _hook) external virtual onlyOwner {
         balanceOfHook = _hook;
         emit UpdatedHookBalanceOf(msg.sender, address(_hook));
     }
 
+    /// TODO
     function setOwnerOfHook(IOwnerOfHook _hook) external virtual onlyOwner {
         ownerOfHook = _hook;
         emit UpdatedHookOwnerOf(msg.sender, address(_hook));
     }
 
+    /// TODO
     function setSafeTransferFromHook(
         ISafeTransferFromHook _hook
     ) external virtual onlyOwner {
@@ -318,6 +321,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         emit UpdatedHookSafeTransferFrom(msg.sender, address(_hook));
     }
 
+    /// TODO
     modifier onlyOwner() {
         _requireCallerIsContractOwner();
 
