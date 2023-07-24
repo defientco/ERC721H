@@ -273,27 +273,6 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         address operator
     ) internal view virtual returns (bool) {}
 
-    /// @notice transferFrom Hook for custom implementation.
-    /// @param from The current owner of the NFT
-    /// @param to The new owner
-    /// @param tokenId The NFT to transfer
-    function _transferFromHook(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal virtual {}
-
-    /// @notice Check if the transferFrom function should use hook.
-    /// @param from The current owner of the NFT
-    /// @param to The new owner
-    /// @param tokenId The NFT to transfer
-    /// @dev Returns whether or not to use the hook for transferFrom function
-    function _useTransferFromHook(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal view virtual returns (bool) {}
-
     /////////////////////////////////////////////////
     /// ERC721C Override
     /////////////////////////////////////////////////
