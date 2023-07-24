@@ -4,6 +4,8 @@ pragma solidity ^0.8.15;
 import {ERC721AC} from "ERC721C/erc721c/ERC721AC.sol";
 import {IERC721A} from "erc721a/contracts/IERC721A.sol";
 import {IBalanceOfHook} from "./interfaces/IBalanceOfHook.sol";
+import {IOwnerOfHook} from "./interfaces/IOwnerOfHook.sol";
+import {IERC721ACH} from "./interfaces/IERC721ACH.sol";
 
 /**
  * @title ERC721ACH
@@ -11,7 +13,7 @@ import {IBalanceOfHook} from "./interfaces/IBalanceOfHook.sol";
  * @notice Extends Limit Break's ERC721-AC implementation with Hook functionality, which
  *         allows the contract owner to override hooks associated with core ERC721 functions.
  */
-contract ERC721ACH is ERC721AC {
+contract ERC721ACH is ERC721AC, IERC721ACH {
     /// @notice Emitted when approve hook is used
     /// @param approved The address that got approved
     /// @param tokenId The token ID that got approved
@@ -51,15 +53,8 @@ contract ERC721ACH is ERC721AC {
         bytes data
     );
 
-    /// @notice Emitted when transferFrom hook is used
-    /// @param caller The caller
-    /// @param balanceOfHook The new hook
-    event UpdatedHook_BalanceOf(
-        address indexed caller,
-        address indexed balanceOfHook
-    );
-
     IBalanceOfHook public balanceOfHook;
+    IOwnerOfHook public ownerOfHook;
 
     /// @notice Contract constructor
     /// @param _contractName The name for the token contract
@@ -97,8 +92,11 @@ contract ERC721ACH is ERC721AC {
     function ownerOf(
         uint256 tokenId
     ) public view virtual override returns (address) {
-        if (_useOwnerOfHook(tokenId)) {
-            return _ownerOfHook(tokenId);
+        if (
+            address(ownerOfHook) != address(0) &&
+            ownerOfHook.useOwnerOfHook(tokenId)
+        ) {
+            return ownerOfHook.ownerOfOverrideHook(tokenId);
         }
         return super.ownerOf(tokenId);
     }
@@ -196,20 +194,6 @@ contract ERC721ACH is ERC721AC {
     /////////////////////////////////////////////////
     /// ERC721 Hooks
     /////////////////////////////////////////////////
-
-    /// @notice ownerOf Hook for custom implementation.
-    /// @param tokenId The token ID to query the owner of
-    /// @dev Returns the owner of the specified token ID
-    function _ownerOfHook(
-        uint256 tokenId
-    ) internal view virtual returns (address) {}
-
-    /// @notice Check if the ownerOf function should use hook.
-    /// @param tokenId The token ID to query the owner of
-    /// @dev Returns whether or not to use the hook for ownerOf function
-    function _useOwnerOfHook(
-        uint256 tokenId
-    ) internal view virtual returns (bool) {}
 
     /// @notice approve Hook for custom implementation.
     /// @param approved The address to be approved for the given token ID
@@ -339,9 +323,19 @@ contract ERC721ACH is ERC721AC {
     /// ERC721H Admin Controls
     /////////////////////////////////////////////////
 
-    function setBalanceOfHook(IBalanceOfHook _balanceOfHook) external virtual {
+    function setBalanceOfHook(IBalanceOfHook _hook) external virtual onlyOwner {
+        balanceOfHook = _hook;
+        emit UpdatedHook_BalanceOf(msg.sender, address(_hook));
+    }
+
+    function setOwnerOfHook(IOwnerOfHook _hook) external virtual onlyOwner {
+        ownerOfHook = _hook;
+        emit UpdatedHook_OwnerOf(msg.sender, address(_hook));
+    }
+
+    modifier onlyOwner() {
         _requireCallerIsContractOwner();
-        balanceOfHook = _balanceOfHook;
-        emit UpdatedHook_BalanceOf(msg.sender, address(_balanceOfHook));
+
+        _;
     }
 }
