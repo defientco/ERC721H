@@ -9,6 +9,7 @@ import {ISafeTransferFromHook} from "./interfaces/ISafeTransferFromHook.sol";
 import {ITransferFromHook} from "./interfaces/ITransferFromHook.sol";
 import {IApproveHook} from "./interfaces/IApproveHook.sol";
 import {ISetApprovalForAllHook} from "./interfaces/ISetApprovalForAllHook.sol";
+import {IGetApprovedHook} from "./interfaces/IGetApprovedHook.sol";
 import {IERC721ACH} from "./interfaces/IERC721ACH.sol";
 
 /**
@@ -24,6 +25,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     ITransferFromHook public transferFromHook;
     IApproveHook public approveHook;
     ISetApprovalForAllHook public setApprovalForAllHook;
+    IGetApprovedHook public getApprovedHook;
 
     /// @notice Contract constructor
     /// @param _contractName The name for the token contract
@@ -112,8 +114,11 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     function getApproved(
         uint256 tokenId
     ) public view virtual override returns (address) {
-        if (_useGetApprovedHook(tokenId)) {
-            return _getApprovedHook(tokenId);
+        if (
+            address(getApprovedHook) != address(0) &&
+            getApprovedHook.useGetApprovedHook(tokenId)
+        ) {
+            return getApprovedHook.getApprovedOverrideHook(tokenId);
         }
         return super.getApproved(tokenId);
     }
@@ -197,20 +202,6 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     /// ERC721 Hooks
     /////////////////////////////////////////////////
 
-    /// @notice getApproved Hook for custom implementation.
-    /// @param tokenId The token ID to query the approval of
-    /// @dev Returns the approved address for a token ID, or zero if no address set
-    function _getApprovedHook(
-        uint256 tokenId
-    ) internal view virtual returns (address) {}
-
-    /// @notice Check if the getApproved function should use hook.
-    /// @param tokenId The token ID to query the approval of
-    /// @dev Returns whether or not to use the hook for getApproved function
-    function _useGetApprovedHook(
-        uint256 tokenId
-    ) internal view virtual returns (bool) {}
-
     /// @notice isApprovedForAll Hook for custom implementation.
     /// @param owner The address that owns the NFTs
     /// @param operator The address that acts on behalf of the owner
@@ -280,6 +271,14 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     ) external virtual onlyOwner {
         setApprovalForAllHook = _hook;
         emit UpdatedHookSetApprovalForAll(msg.sender, address(_hook));
+    }
+
+    /// TODO
+    function setGetApprovedHook(
+        IGetApprovedHook _hook
+    ) external virtual onlyOwner {
+        getApprovedHook = _hook;
+        emit UpdatedHookGetApproved(msg.sender, address(_hook));
     }
 
     /// TODO

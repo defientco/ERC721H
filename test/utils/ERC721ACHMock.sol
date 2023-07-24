@@ -36,12 +36,6 @@ contract ERC721ACHMock is ERC721ACH {
         hooksEnabled = _enabled;
     }
 
-    function _useGetApprovedHook(
-        uint256
-    ) internal view virtual override returns (bool) {
-        return hooksEnabled;
-    }
-
     function _useIsApprovedForAllHook(
         address,
         address

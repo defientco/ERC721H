@@ -48,6 +48,11 @@ interface IERC721ACH {
         address indexed hook
     );
 
+    /// @notice Emitted when getApproved hook is set
+    /// @param caller The caller
+    /// @param hook The new hook
+    event UpdatedHookGetApproved(address indexed caller, address indexed hook);
+
     /// TODO
     function setBalanceOfHook(IBalanceOfHook _hook) external;
 
