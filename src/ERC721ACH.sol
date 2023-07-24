@@ -312,19 +312,19 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
 
     function setBalanceOfHook(IBalanceOfHook _hook) external virtual onlyOwner {
         balanceOfHook = _hook;
-        emit UpdatedHook_BalanceOf(msg.sender, address(_hook));
+        emit UpdatedHookBalanceOf(msg.sender, address(_hook));
     }
 
     function setOwnerOfHook(IOwnerOfHook _hook) external virtual onlyOwner {
         ownerOfHook = _hook;
-        emit UpdatedHook_OwnerOf(msg.sender, address(_hook));
+        emit UpdatedHookOwnerOf(msg.sender, address(_hook));
     }
 
     function setSafeTransferFromHook(
         ISafeTransferFromHook _hook
     ) external virtual onlyOwner {
         safeTransferFromHook = _hook;
-        emit UpdatedHook_SafeTransferFrom(msg.sender, address(_hook));
+        emit UpdatedHookSafeTransferFrom(msg.sender, address(_hook));
     }
 
     modifier onlyOwner() {
