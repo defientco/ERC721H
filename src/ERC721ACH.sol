@@ -8,6 +8,7 @@ import {IOwnerOfHook} from "./interfaces/IOwnerOfHook.sol";
 import {ISafeTransferFromHook} from "./interfaces/ISafeTransferFromHook.sol";
 import {ITransferFromHook} from "./interfaces/ITransferFromHook.sol";
 import {IApproveHook} from "./interfaces/IApproveHook.sol";
+import {ISetApprovalForAllHook} from "./interfaces/ISetApprovalForAllHook.sol";
 import {IERC721ACH} from "./interfaces/IERC721ACH.sol";
 
 /**
@@ -17,21 +18,12 @@ import {IERC721ACH} from "./interfaces/IERC721ACH.sol";
  *         allows the contract owner to override hooks associated with core ERC721 functions.
  */
 contract ERC721ACH is ERC721AC, IERC721ACH {
-    /// @notice Emitted when setApprovalForAll hook is used
-    /// @param owner The owner of the tokens
-    /// @param operator The operator that got (dis)approved
-    /// @param approved The approval status
-    event SetApprovalForAllHookUsed(
-        address indexed owner,
-        address indexed operator,
-        bool approved
-    );
-
     IBalanceOfHook public balanceOfHook;
     IOwnerOfHook public ownerOfHook;
     ISafeTransferFromHook public safeTransferFromHook;
     ITransferFromHook public transferFromHook;
     IApproveHook public approveHook;
+    ISetApprovalForAllHook public setApprovalForAllHook;
 
     /// @notice Contract constructor
     /// @param _contractName The name for the token contract
@@ -98,8 +90,14 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         address operator,
         bool approved
     ) public virtual override {
-        if (_useSetApprovalForAllHook(msg.sender, operator, approved)) {
-            emit SetApprovalForAllHookUsed(msg.sender, operator, approved);
+        if (
+            address(setApprovalForAllHook) != address(0) &&
+            setApprovalForAllHook.useSetApprovalForAllHook(
+                msg.sender,
+                operator,
+                approved
+            )
+        ) {
             _setApprovalForAllHook(msg.sender, operator, approved);
         } else {
             super.setApprovalForAll(operator, approved);
@@ -291,6 +289,14 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     function setApproveHook(IApproveHook _hook) external virtual onlyOwner {
         approveHook = _hook;
         emit UpdatedHookApprove(msg.sender, address(_hook));
+    }
+
+    /// TODO
+    function setSetApprovalForAllHook(
+        ISetApprovalForAllHook _hook
+    ) external virtual onlyOwner {
+        setApprovalForAllHook = _hook;
+        emit UpdatedHookSetApprovalForAll(msg.sender, address(_hook));
     }
 
     /// TODO
