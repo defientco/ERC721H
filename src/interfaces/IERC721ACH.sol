@@ -9,8 +9,9 @@ import {IApproveHook} from "./IApproveHook.sol";
 import {ISetApprovalForAllHook} from "./ISetApprovalForAllHook.sol";
 import {IGetApprovedHook} from "./IGetApprovedHook.sol";
 import {IIsApprovedForAllHook} from "./IIsApprovedForAllHook.sol";
+import {ISafeMintHook} from "./ISafeMintHook.sol";
 
-interface IERC721ACH {
+interface IERC721ACH is ISafeMintHook {
     /// @notice error onlyOwner
     error Access_OnlyOwner();
 
@@ -65,6 +66,9 @@ interface IERC721ACH {
 
     /// TODO
     function setBalanceOfHook(IBalanceOfHook _hook) external;
+
+    /// TODO
+    function setSafeMintHook(ISafeMintHook _hook) external;
 
     /// TODO
     function setOwnerOfHook(IOwnerOfHook _hook) external;
