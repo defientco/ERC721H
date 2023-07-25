@@ -3,6 +3,10 @@ pragma solidity ^0.8.15;
 
 import {ERC721AC} from "ERC721C/erc721c/ERC721AC.sol";
 import {IERC721A} from "erc721a/contracts/IERC721A.sol";
+
+/////////////////////////////////////////////////
+/// Override Hook Interfaces
+/////////////////////////////////////////////////
 import {IBalanceOfHook} from "./interfaces/IBalanceOfHook.sol";
 import {IOwnerOfHook} from "./interfaces/IOwnerOfHook.sol";
 import {ISafeTransferFromHook} from "./interfaces/ISafeTransferFromHook.sol";
@@ -12,6 +16,12 @@ import {ISetApprovalForAllHook} from "./interfaces/ISetApprovalForAllHook.sol";
 import {IGetApprovedHook} from "./interfaces/IGetApprovedHook.sol";
 import {IIsApprovedForAllHook} from "./interfaces/IIsApprovedForAllHook.sol";
 import {IERC721ACH} from "./interfaces/IERC721ACH.sol";
+
+/////////////////////////////////////////////////
+/// After & Before Hook Interfaces
+/////////////////////////////////////////////////
+import {IAfterTransferFromHook} from "./interfaces/IAfterTransferFromHook.sol";
+import {IBeforeTransferFromHook} from "./interfaces/IBeforeTransferFromHook.sol";
 
 /**
  * @title ERC721ACH
@@ -29,6 +39,9 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     ISetApprovalForAllHook public setApprovalForAllHook;
     IGetApprovedHook public getApprovedHook;
     IIsApprovedForAllHook public isApprovedForAllHook;
+
+    IBeforeTransferFromHook public beforeTransferFromHook;
+    IAfterTransferFromHook public afterTransferFromHook;
 
     /// @notice Contract constructor
     /// @param _contractName The name for the token contract
@@ -151,12 +164,25 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         uint256 tokenId
     ) public payable virtual override {
         if (
+            address(beforeTransferFromHook) != address(0) &&
+            beforeTransferFromHook.useBeforeTransferFrom(from, to, tokenId)
+        ) {
+            beforeTransferFromHook.beforeTransferFromOverrideHook(from, to, tokenId);
+        }
+        if (
             address(transferFromHook) != address(0) &&
             transferFromHook.useTransferFromHook(from, to, tokenId)
         ) {
             transferFromHook.transferFromOverrideHook(from, to, tokenId);
         } else {
             super.transferFrom(from, to, tokenId);
+        }
+
+        if (
+            address(afterTransferFromHook) != address(0) &&
+            afterTransferFromHook.useAfterTransferFrom(from, to, tokenId)
+        ) {
+            beforeTransferFromHook.afterTransferFromOverrideHook(from, to, tokenId);
         }
     }
 
@@ -299,6 +325,21 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         emit UpdatedHookIsApprovedForAll(msg.sender, address(_hook));
     }
 
+    /// TODO
+    function setBeforeTransferFromHook (
+        IBeforeTransferFromHook _hook
+    ) external virtual onlyOwner {
+        beforeTransferFromHook = _hook;
+        emit UpdatedHookBeforeTransferFrom(msg.sender, address(_hook));
+    }
+ 
+    /// TODO
+    function setAfterTransferFromHook (
+        IAfterTransferFromHook _hook
+    ) external virtual onlyOwner {
+        beforeTransferFromHook = _hook;
+        emit UpdatedHookAfterTransferFrom(msg.sender, address(_hook));
+    }
     /// TODO
     modifier onlyOwner() {
         _requireCallerIsContractOwner();
