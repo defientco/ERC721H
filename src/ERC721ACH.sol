@@ -29,6 +29,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     ISetApprovalForAllHook public setApprovalForAllHook;
     IGetApprovedHook public getApprovedHook;
     IIsApprovedForAllHook public isApprovedForAllHook;
+    ISafeMintHook public safeMintHook;
 
     /// @notice Contract constructor
     /// @param _contractName The name for the token contract
@@ -43,6 +44,18 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         bytes4 interfaceId
     ) public view virtual override returns (bool) {
         return super.supportsInterface(interfaceId);
+    }
+
+    /// @inheritdoc IERC721A
+    function mint(address to, uint256 quantity) external {
+        if (
+            address(safeMintHook) != address(0) &&
+            safeMintHook.useSafeMintHook(to, quantity)
+        ) {
+            safeMintHook.safeMintOverrideHook(to, quantity);
+        } else {
+            super._safeMint(to, quantity);
+        }
     }
 
     /////////////////////////////////////////////////
@@ -245,6 +258,12 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     function setBalanceOfHook(IBalanceOfHook _hook) external virtual onlyOwner {
         balanceOfHook = _hook;
         emit UpdatedHookBalanceOf(msg.sender, address(_hook));
+    }
+
+    /// TODO
+    function setSafeMintHook(ISafeMintHook _hook) external virtual onlyOwner {
+        safeMintHook = _hook;
+        emit SafeMintHookUsed(msg.sender, address(_hook));
     }
 
     /// TODO
