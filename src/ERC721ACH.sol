@@ -20,7 +20,11 @@ import {IERC721ACH} from "./interfaces/IERC721ACH.sol";
 /////////////////////////////////////////////////
 /// After & Before Hook Interfaces
 /////////////////////////////////////////////////
+<<<<<<< HEAD
 import {IAFterTransferFromHook} from "./interfaces/IAfterTransferFromHook.sol";
+=======
+import {IAfterTransferFromHook} from "./interfaces/IAfterTransferFromHook.sol";
+>>>>>>> ac1aa85ec99aa5c52d853c6a3dd74e1f32777c8f
 import {IBeforeTransferFromHook} from "./interfaces/IBeforeTransferFromHook.sol";
 
 /**

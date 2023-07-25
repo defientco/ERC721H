@@ -63,6 +63,19 @@ interface IERC721ACH {
         address indexed hook
     );
 
+    /// @notice Emitted when beforeTransferFrom hook is set
+    /// @param caller The caller
+    /// @param hook The new hook
+    event UpdatedHookBeforeTransferFrom(address indexed caller, address indexed hook);
+
+    /// @notice Emitted when isApprovedForAll hook is set
+    /// @param caller The caller
+    /// @param hook The new hook
+    event UpdatedHookAfterTransferFrom(
+        address indexed caller,
+        address indexed hook
+    );
+
     /// TODO
     function setBalanceOfHook(IBalanceOfHook _hook) external;
 

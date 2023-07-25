@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
 
+<<<<<<< HEAD
 interface IAfterTransferFrom {
+=======
+interface IAfterTransferFromHook {
+>>>>>>> ac1aa85ec99aa5c52d853c6a3dd74e1f32777c8f
     /// @notice Emitted when afterTansferFrom hook is used
     /// @param from The current owner of the token
     /// @param to The receiver of the token
