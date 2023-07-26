@@ -74,7 +74,7 @@ interface IERC721ACH {
     /// @notice Emitted when setBeforeTokenTransfers hook is set
     /// @param caller The caller
     /// @param hook The new hook
-    event AfterHookBeforeTokenTransfers(
+    event UpdatedHookAfterTokenTransfers(
         address indexed caller,
         address indexed hook
     );

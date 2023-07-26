@@ -19,7 +19,7 @@ contract BeforeTokenTransfersHookTest is DSTest {
         hookMock = new BeforeTokenTransfersHookMock();
     }
 
-    function test_balanceOfHook() public {
+    function test_beforeTokenTransfersHook() public {
         assertEq(address(0), address(erc721Mock.beforeTokenTransfersHook()));
     }
 

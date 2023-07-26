@@ -19,5 +19,62 @@ contract AfterTokenTransfersHookTest is DSTest {
         hookMock = new AfterTokenTransfersHookMock();
     }
 
+    function test_afterTokenTransfersHook() public {
+        assertEq(address(0), address(erc721Mock.afterTokenTransfersHook()));
+    }
+
+    function test_setAfterTokenTransfersHook() public {
+        assertEq(address(0), address(erc721Mock.afterTokenTransfersHook()));
+
+        // calling an admin function without being the contract owner should revert       
+        vm.expectRevert();
+        erc721Mock.setAfterTokenTransfersHook(hookMock);
+        
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        erc721Mock.setAfterTokenTransfersHook(hookMock);
+        assertEq(address(hookMock), address(erc721Mock.afterTokenTransfersHook()));
+    }
+
+     function test_afterTokenTransfersHook(
+        uint256 startTokenId,
+        uint256 quantity
+    ) public {
+        vm.assume(quantity > 0);
+        vm.assume(startTokenId > 0);
+        vm.assume(quantity < 10_000);
+        vm.assume(quantity >= startTokenId);
+       
+
+        // Mint some tokens first
+        test_setAfterTokenTransfersHook();
+        erc721Mock.mint(DEFAULT_BUYER_ADDRESS, quantity);
+
+        
+        vm.prank(DEFAULT_BUYER_ADDRESS);
+        erc721Mock.transferFrom(
+            DEFAULT_BUYER_ADDRESS,
+            DEFAULT_OWNER_ADDRESS,
+            startTokenId
+        );
+
+        assertEq(DEFAULT_OWNER_ADDRESS, erc721Mock.ownerOf(startTokenId));
+
+        // Verify hook override
+        hookMock.setHooksEnabled(true);
+        vm.expectRevert(
+            AfterTokenTransfersHookMock.AfterTokenTransfersHook_Executed.selector
+        );
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        erc721Mock.transferFrom(
+            DEFAULT_OWNER_ADDRESS,
+            DEFAULT_BUYER_ADDRESS,
+            startTokenId
+        );
+
+
+    }
+
+
+
 
 }
