@@ -34,7 +34,7 @@ interface IMintHook {
         @param quantity The number of tokens being transferred.
             
      */
-    function MintOverrideHook(
+    function mintOverrideHook(
        address to,
         uint256 quantity
     ) external;

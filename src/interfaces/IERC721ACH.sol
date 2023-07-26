@@ -79,6 +79,11 @@ interface IERC721ACH {
         address indexed hook
     );
 
+    /// @notice Emitted when setMint hook is set
+    /// @param caller The caller
+    /// @param hook The new hook
+    event UpdatedHookMint(address indexed caller, address indexed hook);
+
 
     /// TODO
     function setBalanceOfHook(IBalanceOfHook _hook) external;

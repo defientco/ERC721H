@@ -26,7 +26,7 @@ contract MintHookMock is IMintHook {
     function mintOverrideHook(
         address,
         uint256
-    ) external view override returns (bool) {
+    ) external pure override {
         revert MintHook_Executed();
     }
 }

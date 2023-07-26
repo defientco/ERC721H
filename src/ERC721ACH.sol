@@ -12,8 +12,8 @@ import {ISetApprovalForAllHook} from "./interfaces/ISetApprovalForAllHook.sol";
 import {IGetApprovedHook} from "./interfaces/IGetApprovedHook.sol";
 import {IIsApprovedForAllHook} from "./interfaces/IIsApprovedForAllHook.sol";
 import {IBeforeTokenTransfersHook} from "./interfaces/IBeforeTokenTransfersHook.sol";
-
 import {IAfterTokenTransfersHook} from "./interfaces/IAfterTokenTransfersHook.sol";
+import {IMintHook} from "./interfaces/IMintHook.sol";
 import {IERC721ACH} from "./interfaces/IERC721ACH.sol";
 
 /**
@@ -34,6 +34,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     IIsApprovedForAllHook public isApprovedForAllHook;
     IBeforeTokenTransfersHook public beforeTokenTransfersHook;
     IAfterTokenTransfersHook public afterTokenTransfersHook;
+    IMintHook public mintHook;
 
     /// @notice Contract constructor
     /// @param _contractName The name for the token contract
@@ -213,7 +214,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         }
     }
 
-    
+    /// TODO
     function _beforeTokenTransfers(
         address from,
         address to,
@@ -235,6 +236,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         }
     }
 
+    /// TODO
     function _afterTokenTransfers(
         address from,
         address to,
@@ -253,6 +255,21 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
             );
         } else {
             super._afterTokenTransfers(from, to, startTokenId, quantity);
+        }
+    }
+
+    /// TODO
+    function _mint(
+        address to,
+        uint256 tokenId
+    ) internal virtual override {
+        if (
+            address(mintHook) != address(0) &&
+            mintHook.useMintHook(to, tokenId)
+        ) {
+            mintHook.mintOverrideHook(to, tokenId);
+        } else {
+            super._mint(to, tokenId);
         }
     }
 
@@ -361,6 +378,13 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         afterTokenTransfersHook = _hook;
         emit UpdatedHookAfterTokenTransfers(msg.sender, address(_hook));
     } 
+
+    function setMintHook(
+        IMintHook _hook
+    ) external virtual onlyOwner {
+        mintHook = _hook;
+        emit UpdatedHookMint(msg.sender, address(_hook));
+    }
 
 
     /// TODO
