@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
 
+
+import "forge-std/console.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {DSTest} from "ds-test/test.sol";
 import {ERC721ACHMock} from "./utils/ERC721ACHMock.sol";
@@ -143,5 +145,44 @@ contract ERC721ACHTest is DSTest {
             isOwner ? hook : address(0),
             address(erc721Mock.isApprovedForAllHook())
         );
+    }
+
+        function test_gasEstimateForSingleMint() public {
+        address buyer = address(0x1111);
+        console.logString(
+            "=====================gas estimation for minting single NFT=========================="
+        );
+        uint originGasLeft;
+        uint gasDelta;
+        originGasLeft = gasleft();
+        erc721Mock.mint(buyer, 1);
+        gasDelta = originGasLeft - gasleft() - 100;
+        console.log("gasDelta: %d", gasDelta);
+    }
+
+    function test_gasEstimateForMint2NFTs() public {
+        address buyer = address(0x1111);
+        console.logString(
+            "=====================gas estimation for minting 2 NFT=========================="
+        );
+        uint originGasLeft;
+        uint gasDelta;
+        originGasLeft = gasleft();
+        erc721Mock.mint(buyer, 2);
+        gasDelta = originGasLeft - gasleft() - 100;
+        console.log("gasDelta: %d", gasDelta);
+    }
+
+    function test_gasEstimateForMint3NFTs() public {
+        address buyer = address(0x1111);
+        console.logString(
+            "=====================gas estimation for minting 3 NFT=========================="
+        );
+        uint originGasLeft;
+        uint gasDelta;
+        originGasLeft = gasleft();
+        erc721Mock.mint(buyer, 3);
+        gasDelta = originGasLeft - gasleft() - 100;
+        console.log("gasDelta: %d", gasDelta);
     }
 }
