@@ -12,6 +12,8 @@ import {ISetApprovalForAllHook} from "./interfaces/ISetApprovalForAllHook.sol";
 import {IGetApprovedHook} from "./interfaces/IGetApprovedHook.sol";
 import {IIsApprovedForAllHook} from "./interfaces/IIsApprovedForAllHook.sol";
 import {IBeforeTokenTransfersHook} from "./interfaces/IBeforeTokenTransfersHook.sol";
+
+import {IAfterTokenTransfersHook} from "./interfaces/IAfterTokenTransfersHook.sol";
 import {IERC721ACH} from "./interfaces/IERC721ACH.sol";
 
 /**
@@ -31,6 +33,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     IGetApprovedHook public getApprovedHook;
     IIsApprovedForAllHook public isApprovedForAllHook;
     IBeforeTokenTransfersHook public beforeTokenTransfersHook;
+    IAfterTokenTransfersHook public afterTokenTransfersHook;
 
     /// @notice Contract constructor
     /// @param _contractName The name for the token contract
@@ -232,6 +235,27 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         }
     }
 
+    function _afterTokenTransfers(
+        address from,
+        address to,
+        uint256 startTokenId,
+        uint256 quantity
+    ) internal virtual override {
+        if (
+            address(afterTokenTransfersHook) != address(0) &&
+            afterTokenTransfersHook.useAfterTokenTransfersHook(from, to, startTokenId, quantity)
+        ) {
+            afterTokenTransfersHook.afterTokenTransfersOverrideHook(
+                from,
+                to,
+                startTokenId,
+                quantity
+            );
+        } else {
+            super._afterTokenTransfers(from, to, startTokenId, quantity);
+        }
+    }
+
     /////////////////////////////////////////////////
     /// ERC721 Hooks
     /////////////////////////////////////////////////
@@ -330,6 +354,13 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         beforeTokenTransfersHook = _hook;
         emit UpdatedHookBeforeTokenTransfers(msg.sender, address(_hook));
     }
+
+    function setAfterTokenTransfersHook(
+        IAfterTokenTransfersHook _hook
+    ) external virtual onlyOwner {
+        afterTokenTransfersHook = _hook;
+        emit UpdatedHookAfterTokenTransfers(msg.sender, address(_hook));
+    } 
 
 
     /// TODO
