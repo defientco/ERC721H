@@ -25,6 +25,11 @@ contract BeforeTokenTransfersHookTest is DSTest {
 
     function test_setBeforeTokenTransfersHook() public {
         assertEq(address(0), address(erc721Mock.beforeTokenTransfersHook()));
+
+        // calling an admin function without being the contract owner should revert       
+        vm.expectRevert();
+        erc721Mock.setBeforeTokenTransfersHook(hookMock);
+        
         vm.prank(DEFAULT_OWNER_ADDRESS);
         erc721Mock.setBeforeTokenTransfersHook(hookMock);
         assertEq(address(hookMock), address(erc721Mock.beforeTokenTransfersHook()));
