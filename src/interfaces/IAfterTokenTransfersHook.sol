@@ -44,7 +44,7 @@ interface IAfterTokenTransfersHook {
         @param quantity The number of tokens being transferred.
             
      */
-    function AfterTokenTransfersOverrideHook(
+    function afterTokenTransfersOverrideHook(
         address from,
         address to,
         uint256 startTokenId,
