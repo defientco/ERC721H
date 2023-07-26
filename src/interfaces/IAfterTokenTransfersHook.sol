@@ -6,7 +6,7 @@ pragma solidity ^0.8.15;
 interface IAfterTokenTransfersHook {
 
     /**
-        @notice Emitted when the After token transfers hook is used.
+        @notice Emitted when the after token transfers hook is used.
         @param from Address from which the tokens are being transferred.
         @param to Address to which the tokens are being transferred.
         @param startTokenId The starting ID of the tokens being transferred.
