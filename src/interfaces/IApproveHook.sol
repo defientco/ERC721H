@@ -22,5 +22,5 @@ interface IApproveHook {
     function approveOverrideHook(
         address approved,
         uint256 tokenId
-    ) external view returns (uint256);
+    ) external  returns (uint256);
 }
