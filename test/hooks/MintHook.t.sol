@@ -19,6 +19,9 @@ contract MintHookTest is DSTest {
         hookMock = new MintHookMock();
     }
 
+    function test_mintHook() public {
+        assertEq(address(0), address(erc721Mock.mintHook()));
+    }
 
     
 
