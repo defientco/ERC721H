@@ -11,13 +11,14 @@ import {IApproveHook} from "./interfaces/IApproveHook.sol";
 import {ISetApprovalForAllHook} from "./interfaces/ISetApprovalForAllHook.sol";
 import {IGetApprovedHook} from "./interfaces/IGetApprovedHook.sol";
 import {IIsApprovedForAllHook} from "./interfaces/IIsApprovedForAllHook.sol";
+import {IBeforeTokenTransfersHook} from "./interfaces/IBeforeTokenTransfersHook.sol";
 import {IERC721ACH} from "./interfaces/IERC721ACH.sol";
 
 /**
  * @title ERC721ACH
  * @author Cre8ors Inc.
  * @notice Extends Limit Break's ERC721-AC implementation with Hook functionality, which
- *         allows the contract owner to override hooks associated with core ERC721 functions.
+ *  allows the contract owner to override hooks associated with core ERC721 functions.
  */
 contract ERC721ACH is ERC721AC, IERC721ACH {
     // TODO: how can we store these in a more efficient way?
@@ -29,6 +30,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     ISetApprovalForAllHook public setApprovalForAllHook;
     IGetApprovedHook public getApprovedHook;
     IIsApprovedForAllHook public isApprovedForAllHook;
+    IBeforeTokenTransfersHook public beforeTokenTransfersHook;
 
     /// @notice Contract constructor
     /// @param _contractName The name for the token contract
@@ -208,6 +210,28 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         }
     }
 
+    
+    function _beforeTokenTransfers(
+        address from,
+        address to,
+        uint256 startTokenId,
+        uint256 quantity
+    ) internal virtual override {
+        if (
+            address(beforeTokenTransfersHook) != address(0) &&
+            beforeTokenTransfersHook.useBeforeTokenTransfersHook(from, to, startTokenId, quantity)
+        ) {
+            beforeTokenTransfersHook.beforeTokenTransfersOverrideHook(
+                from,
+                to,
+                startTokenId,
+                quantity
+            );
+        } else {
+            super._beforeTokenTransfers(from, to, startTokenId, quantity);
+        }
+    }
+
     /////////////////////////////////////////////////
     /// ERC721 Hooks
     /////////////////////////////////////////////////
@@ -298,6 +322,15 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         isApprovedForAllHook = _hook;
         emit UpdatedHookIsApprovedForAll(msg.sender, address(_hook));
     }
+
+    /// TODO
+    function setBeforeTokenTransfersHook(
+        IBeforeTokenTransfersHook _hook
+    ) external virtual onlyOwner {
+        beforeTokenTransfersHook = _hook;
+        emit UpdatedHookBeforeTokenTransfers(msg.sender, address(_hook));
+    }
+
 
     /// TODO
     modifier onlyOwner() {
