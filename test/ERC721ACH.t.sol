@@ -15,6 +15,7 @@ import {ISetApprovalForAllHook} from "../src/interfaces/ISetApprovalForAllHook.s
 import {IGetApprovedHook} from "../src/interfaces/IGetApprovedHook.sol";
 import {IIsApprovedForAllHook} from "../src/interfaces/IIsApprovedForAllHook.sol";
 import {IERC721ACH} from "../src/interfaces/IERC721ACH.sol";
+import {IBeforeTokenTransfersHook} from "../src/interfaces/IBeforeTokenTransfersHook.sol";
 
 contract ERC721ACHTest is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);
@@ -142,6 +143,20 @@ contract ERC721ACHTest is DSTest {
         assertEq(
             isOwner ? hook : address(0),
             address(erc721Mock.isApprovedForAllHook())
+        );
+    }
+   
+    function test_beforeTokenTransfersHook(address hook, address caller) public {
+        assertEq(address(0), address(erc721Mock.beforeTokenTransfersHook()));
+        bool isOwner = caller == DEFAULT_OWNER_ADDRESS;
+        vm.prank(caller);
+        if (!isOwner) {
+            vm.expectRevert(IERC721ACH.Access_OnlyOwner.selector);
+        }
+        erc721Mock.setBeforeTokenTransfersHook(IBeforeTokenTransfersHook(hook));
+        assertEq(
+            isOwner ? hook : address(0),
+            address(erc721Mock.beforeTokenTransfersHook())
         );
     }
 }
