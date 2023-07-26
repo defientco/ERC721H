@@ -3,10 +3,6 @@ pragma solidity ^0.8.15;
 
 import {ERC721AC} from "ERC721C/erc721c/ERC721AC.sol";
 import {IERC721A} from "erc721a/contracts/IERC721A.sol";
-
-/////////////////////////////////////////////////
-/// Override Hook Interfaces
-/////////////////////////////////////////////////
 import {IBalanceOfHook} from "./interfaces/IBalanceOfHook.sol";
 import {IOwnerOfHook} from "./interfaces/IOwnerOfHook.sol";
 import {ISafeTransferFromHook} from "./interfaces/ISafeTransferFromHook.sol";
@@ -17,15 +13,7 @@ import {IGetApprovedHook} from "./interfaces/IGetApprovedHook.sol";
 import {IIsApprovedForAllHook} from "./interfaces/IIsApprovedForAllHook.sol";
 import {IERC721ACH} from "./interfaces/IERC721ACH.sol";
 
-/////////////////////////////////////////////////
-/// After & Before Hook Interfaces
-/////////////////////////////////////////////////
-<<<<<<< HEAD
-import {IAFterTransferFromHook} from "./interfaces/IAfterTransferFromHook.sol";
-=======
-import {IAfterTransferFromHook} from "./interfaces/IAfterTransferFromHook.sol";
->>>>>>> ac1aa85ec99aa5c52d853c6a3dd74e1f32777c8f
-import {IBeforeTransferFromHook} from "./interfaces/IBeforeTransferFromHook.sol";
+import {IBeforeTokenTransfersHook} from "./interfaces/IBeforeTokenTransfersHook.sol";
 
 /**
  * @title ERC721ACH
@@ -43,9 +31,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     ISetApprovalForAllHook public setApprovalForAllHook;
     IGetApprovedHook public getApprovedHook;
     IIsApprovedForAllHook public isApprovedForAllHook;
-
-    IBeforeTransferFromHook public beforeTransferFromHook;
-    IAfterTransferFromHook public afterTransferFromHook;
+    IBeforeTokenTransfersHook public beforeTokenTransfersHook;
 
     /// @notice Contract constructor
     /// @param _contractName The name for the token contract
@@ -168,25 +154,12 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         uint256 tokenId
     ) public payable virtual override {
         if (
-            address(beforeTransferFromHook) != address(0) &&
-            beforeTransferFromHook.useBeforeTransferFrom(from, to, tokenId)
-        ) {
-            beforeTransferFromHook.beforeTransferFromOverrideHook(from, to, tokenId);
-        }
-        if (
             address(transferFromHook) != address(0) &&
             transferFromHook.useTransferFromHook(from, to, tokenId)
         ) {
             transferFromHook.transferFromOverrideHook(from, to, tokenId);
         } else {
             super.transferFrom(from, to, tokenId);
-        }
-
-        if (
-            address(afterTransferFromHook) != address(0) &&
-            afterTransferFromHook.useAfterTransferFrom(from, to, tokenId)
-        ) {
-            beforeTransferFromHook.afterTransferFromOverrideHook(from, to, tokenId);
         }
     }
 
@@ -238,6 +211,32 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         }
     }
 
+     /// @dev Ties the erc721a _beforeTokenTransfers hook to more granular transfer validation logic
+    function _beforeTokenTransfers(
+        address from,
+        address to,
+        uint256 startTokenId,
+        uint256 quantity
+    ) internal virtual override {
+        if (
+            address(beforeTokenTransfersHook) != address(0) && 
+            beforeTokenTransfersHook.useBeforeTokenTransfersFrom(
+                from,
+                to,
+                startTokenId,
+                quantity
+            )
+        ) {
+            beforeTokenTransfersHook.beforeTokenTransfersOverrideHook(
+                from,
+                to,
+                startTokenId,
+                quantity
+            );
+        } else {
+            super._beforeTokenTransfers(from, to, startTokenId, quantity);
+        }
+    }
     /////////////////////////////////////////////////
     /// ERC721 Hooks
     /////////////////////////////////////////////////
@@ -329,20 +328,12 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         emit UpdatedHookIsApprovedForAll(msg.sender, address(_hook));
     }
 
-    /// TODO
-    function setBeforeTransferFromHook (
-        IBeforeTransferFromHook _hook
+    /// TODO 
+    function setBeforeTokenTransfersHook (
+        IBeforeTokenTransfersHook _hook
     ) external virtual onlyOwner {
-        beforeTransferFromHook = _hook;
-        emit UpdatedHookBeforeTransferFrom(msg.sender, address(_hook));
-    }
- 
-    /// TODO
-    function setAfterTransferFromHook (
-        IAfterTransferFromHook _hook
-    ) external virtual onlyOwner {
-        beforeTransferFromHook = _hook;
-        emit UpdatedHookAfterTransferFrom(msg.sender, address(_hook));
+        beforeTokenTransfersHook = _hook;
+        emit UpdatedHookBeforeTokenTransfers(msg.sender, address(_hook));
     }
     /// TODO
     modifier onlyOwner() {

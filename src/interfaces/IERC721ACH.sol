@@ -9,6 +9,7 @@ import {IApproveHook} from "./IApproveHook.sol";
 import {ISetApprovalForAllHook} from "./ISetApprovalForAllHook.sol";
 import {IGetApprovedHook} from "./IGetApprovedHook.sol";
 import {IIsApprovedForAllHook} from "./IIsApprovedForAllHook.sol";
+import {IBeforeTokenTransfersHook} from "./IBeforeTokenTransfersHook.sol";
 
 interface IERC721ACH {
     /// @notice error onlyOwner
@@ -63,15 +64,10 @@ interface IERC721ACH {
         address indexed hook
     );
 
-    /// @notice Emitted when beforeTransferFrom hook is set
+    /// @notice Emitted when beforeTokensTransfers hook is set
     /// @param caller The caller
     /// @param hook The new hook
-    event UpdatedHookBeforeTransferFrom(address indexed caller, address indexed hook);
-
-    /// @notice Emitted when isApprovedForAll hook is set
-    /// @param caller The caller
-    /// @param hook The new hook
-    event UpdatedHookAfterTransferFrom(
+    event UpdatedHookBeforeTokenTransfers(
         address indexed caller,
         address indexed hook
     );
@@ -99,4 +95,7 @@ interface IERC721ACH {
 
     /// TODO
     function setIsApprovedForAllHook(IIsApprovedForAllHook _hook) external;
+
+    /// TODO
+    function setBeforeTokenTransfersHook(IBeforeTokenTransfersHook _hook) external;
 }
