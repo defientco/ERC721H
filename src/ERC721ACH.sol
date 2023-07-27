@@ -80,22 +80,21 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     /////////////////////////////////////////////////
 
     /// @inheritdoc IERC721A
-    function balanceOf(
-        address owner
-    ) public view virtual override returns (uint256) {
-        if (
-            address(balanceOfHook) != address(0) &&
-            balanceOfHook.useBalanceOfHook(owner)
-        ) {
-            return balanceOfHook.balanceOfOverrideHook(owner);
-        }
-        return super.balanceOf(owner);
+    function balanceOf(address owner) public view virtual override returns (uint256) {
+    IBalanceOfHook balanceOfHookInstance = IBalanceOfHook(hooks[HookType.BalanceOf]);
+    
+    if (address(balanceOfHookInstance) != address(0) && balanceOfHookInstance.useBalanceOfHook(owner)) {
+        return balanceOfHookInstance.balanceOfOverrideHook(owner);
     }
+    return super.balanceOf(owner);
+}
+
 
     /// @inheritdoc IERC721A
     function ownerOf(
         uint256 tokenId
     ) public view virtual override returns (address) {
+        IOwnerOfHook ownerOfHook = IOwnerOfHook(hooks[HookType.OwnerOf]);
         if (
             address(ownerOfHook) != address(0) &&
             ownerOfHook.useOwnerOfHook(tokenId)
@@ -110,6 +109,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         address approved,
         uint256 tokenId
     ) public payable virtual override {
+        IApproveHook approveHook = IApproveHook(hooks[HookType.Approve]);
         if (
             address(approveHook) != address(0) &&
             approveHook.useApproveHook(approved, tokenId)
@@ -125,6 +125,9 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         address operator,
         bool approved
     ) public virtual override {
+
+        ISetApprovalForAllHook setApprovalForAllHook = ISetApprovalForAllHook(hooks[HookType.SetApprovalForAll]);
+
         if (
             address(setApprovalForAllHook) != address(0) &&
             setApprovalForAllHook.useSetApprovalForAllHook(
@@ -147,6 +150,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     function getApproved(
         uint256 tokenId
     ) public view virtual override returns (address) {
+        IGetApprovedHook getApprovedHook = IGetApprovedHook(hooks[HookType.GetApproved]);
         if (
             address(getApprovedHook) != address(0) &&
             getApprovedHook.useGetApprovedHook(tokenId)
@@ -161,6 +165,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         address owner,
         address operator
     ) public view virtual override returns (bool) {
+        IIsApprovedForAllHook isApprovedForAllHook = IIsApprovedForAllHook(hooks[HookType.IsApprovedForAll]);
         if (
             address(isApprovedForAllHook) != address(0) &&
             isApprovedForAllHook.useIsApprovedForAllHook(owner, operator)
@@ -180,6 +185,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         address to,
         uint256 tokenId
     ) public payable virtual override {
+        ITransferFromHook transferFromHook = ITransferFromHook(hooks[HookType.TransferFrom]);
         if (
             address(transferFromHook) != address(0) &&
             transferFromHook.useTransferFromHook(from, to, tokenId)
@@ -216,6 +222,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         uint256 tokenId,
         bytes memory data
     ) internal {
+        ISafeTransferFromHook safeTransferFromHook = ISafeTransferFromHook(hooks[HookType.SafeTransferFrom]);
         if (
             address(safeTransferFromHook) != address(0) &&
             safeTransferFromHook.useSafeTransferFromHook(
@@ -245,6 +252,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         uint256 startTokenId,
         uint256 quantity
     ) internal virtual override {
+        IBeforeTokenTransfersHook beforeTokenTransfersHook = IBeforeTokenTransfersHook(hooks[HookType.BeforeTokenTransfers]);
         if (
             address(beforeTokenTransfersHook) != address(0) &&
             beforeTokenTransfersHook.useBeforeTokenTransfersHook(from, to, startTokenId, quantity)
@@ -267,6 +275,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         uint256 startTokenId,
         uint256 quantity
     ) internal virtual override {
+        IAfterTokenTransfersHook afterTokenTransfersHook = IAfterTokenTransfersHook(hooks[HookType.AfterTokenTransfers]);
         if (
             address(afterTokenTransfersHook) != address(0) &&
             afterTokenTransfersHook.useAfterTokenTransfersHook(from, to, startTokenId, quantity)
@@ -287,6 +296,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         address to,
         uint256 tokenId
     ) internal virtual override {
+        IMintHook mintHook = IMintHook(hooks[HookType.Mint]);
         if (
             address(mintHook) != address(0) &&
             mintHook.useMintHook(to, tokenId)
