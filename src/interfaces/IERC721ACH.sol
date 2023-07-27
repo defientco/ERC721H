@@ -14,28 +14,32 @@ interface IERC721ACH {
     /// @notice error onlyOwner
     error Access_OnlyOwner();
 
+    enum HookType {
+        BalanceOf,
+        OwnerOf,
+        SafeTransferFrom,
+        TransferFrom,
+        Approve,
+        SetApprovalForAll,
+        GetApproved,
+        IsApprovedForAll,
+        BeforeTokenTransfers,
+        AfterTokenTransfers,
+        Mint
+    }
 
-    /// TODO
-    function setBalanceOfHook(IBalanceOfHook _hook) external;
+    /**
+     * @notice Sets the contract address for a specified hook type.
+     * @param hookType The type of hook to set, as defined in the HookType enum.
+     * @param hookAddress The address of the contract implementing the hook interface.
+     */
+    function setHook(HookType hookType, address hookAddress) external;
 
-    /// TODO
-    function setOwnerOfHook(IOwnerOfHook _hook) external;
-
-    /// TODO
-    function setSafeTransferFromHook(ISafeTransferFromHook _hook) external;
-
-    /// TODO
-    function setTransferFromHook(ITransferFromHook _hook) external;
-
-    /// TODO
-    function setApproveHook(IApproveHook _hook) external;
-
-    /// TODO
-    function setSetApprovalForAllHook(ISetApprovalForAllHook _hook) external;
-
-    /// TODO
-    function setGetApprovedHook(IGetApprovedHook _hook) external;
-
-    /// TODO
-    function setIsApprovedForAllHook(IIsApprovedForAllHook _hook) external;
+    /**
+     * @notice Returns the contract address for a specified hook type.
+     * @param hookType The type of hook to set, as defined in the HookType enum.
+     * @return The address of the contract implementing the hook interface.
+     */
+    function getHook(HookType hookType) external view returns (address);
+    
 }

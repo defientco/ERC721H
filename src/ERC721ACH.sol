@@ -60,6 +60,10 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     */
     mapping(HookType => address) public hooks;
 
+
+    event UpdatedHook(address indexed setter, HookType hookType, address indexed hookAddress);
+
+
     /// @notice Contract constructor
     /// @param _contractName The name for the token contract
     /// @param _contractSymbol The symbol for the token contract
