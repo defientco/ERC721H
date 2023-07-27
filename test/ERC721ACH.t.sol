@@ -34,114 +34,114 @@ contract ERC721ACHTest is DSTest {
     }
 
     function test_balanceOfHook(address hook, address caller) public {
-        assertEq(address(0), address(erc721Mock.balanceOfHook()));
+        assertEq(address(0), address(erc721Mock.getHook(IERC721ACH.HookType.BalanceOf)));
         bool isOwner = caller == DEFAULT_OWNER_ADDRESS;
         vm.prank(caller);
         if (!isOwner) {
             vm.expectRevert(IERC721ACH.Access_OnlyOwner.selector);
         }
-        erc721Mock.setBalanceOfHook(IBalanceOfHook(hook));
+        erc721Mock.setHook(IERC721ACH.HookType.BalanceOf, hook);
         assertEq(
             isOwner ? hook : address(0),
-            address(erc721Mock.balanceOfHook())
+            address(erc721Mock.getHook(IERC721ACH.HookType.BalanceOf))
         );
     }
 
     function test_ownerOfHook(address hook, address caller) public {
-        assertEq(address(0), address(erc721Mock.ownerOfHook()));
+        assertEq(address(0), address(erc721Mock.getHook(IERC721ACH.HookType.OwnerOf)));
         bool isOwner = caller == DEFAULT_OWNER_ADDRESS;
         vm.prank(caller);
         if (!isOwner) {
             vm.expectRevert(IERC721ACH.Access_OnlyOwner.selector);
         }
-        erc721Mock.setOwnerOfHook(IOwnerOfHook(hook));
+        erc721Mock.setHook(IERC721ACH.HookType.OwnerOf, hook);
         assertEq(
             isOwner ? hook : address(0),
-            address(erc721Mock.ownerOfHook())
+            address(erc721Mock.getHook(IERC721ACH.HookType.OwnerOf))
         );
     }
 
     function test_safeTransferFromHook(address hook, address caller) public {
-        assertEq(address(0), address(erc721Mock.safeTransferFromHook()));
+        assertEq(address(0), address(erc721Mock.getHook(IERC721ACH.HookType.SafeTransferFrom)));
         bool isOwner = caller == DEFAULT_OWNER_ADDRESS;
         vm.prank(caller);
         if (!isOwner) {
             vm.expectRevert(IERC721ACH.Access_OnlyOwner.selector);
         }
-        erc721Mock.setSafeTransferFromHook(ISafeTransferFromHook(hook));
+        erc721Mock.setHook(IERC721ACH.HookType.SafeTransferFrom, hook);
         assertEq(
             isOwner ? hook : address(0),
-            address(erc721Mock.safeTransferFromHook())
+            address(erc721Mock.getHook(IERC721ACH.HookType.SafeTransferFrom))
         );
     }
 
     function test_transferFromHook(address hook, address caller) public {
-        assertEq(address(0), address(erc721Mock.transferFromHook()));
+        assertEq(address(0), address(erc721Mock.getHook(IERC721ACH.HookType.TransferFrom)));
         bool isOwner = caller == DEFAULT_OWNER_ADDRESS;
         vm.prank(caller);
         if (!isOwner) {
             vm.expectRevert(IERC721ACH.Access_OnlyOwner.selector);
         }
-        erc721Mock.setTransferFromHook(ITransferFromHook(hook));
+        erc721Mock.setHook(IERC721ACH.HookType.TransferFrom, hook);
         assertEq(
             isOwner ? hook : address(0),
-            address(erc721Mock.transferFromHook())
+            address(erc721Mock.getHook(IERC721ACH.HookType.TransferFrom))
         );
     }
 
     function test_approveHook(address hook, address caller) public {
-        assertEq(address(0), address(erc721Mock.approveHook()));
+        assertEq(address(0), address(erc721Mock.getHook(IERC721ACH.HookType.Approve)));
         bool isOwner = caller == DEFAULT_OWNER_ADDRESS;
         vm.prank(caller);
         if (!isOwner) {
             vm.expectRevert(IERC721ACH.Access_OnlyOwner.selector);
         }
-        erc721Mock.setApproveHook(IApproveHook(hook));
+        erc721Mock.setHook(IERC721ACH.HookType.Approve, hook);
         assertEq(
             isOwner ? hook : address(0),
-            address(erc721Mock.approveHook())
+            address(erc721Mock.getHook(IERC721ACH.HookType.Approve))
         );
     }
 
     function test_setApprovalForAllHook(address hook, address caller) public {
-        assertEq(address(0), address(erc721Mock.setApprovalForAllHook()));
+        assertEq(address(0), address(erc721Mock.getHook(IERC721ACH.HookType.SetApprovalForAll)));
         bool isOwner = caller == DEFAULT_OWNER_ADDRESS;
         vm.prank(caller);
         if (!isOwner) {
             vm.expectRevert(IERC721ACH.Access_OnlyOwner.selector);
         }
-        erc721Mock.setSetApprovalForAllHook(ISetApprovalForAllHook(hook));
+        erc721Mock.setHook(IERC721ACH.HookType.SetApprovalForAll, hook);
         assertEq(
             isOwner ? hook : address(0),
-            address(erc721Mock.setApprovalForAllHook())
+            address(erc721Mock.getHook(IERC721ACH.HookType.SetApprovalForAll))
         );
     }
 
     function test_getApprovedHook(address hook, address caller) public {
-        assertEq(address(0), address(erc721Mock.getApprovedHook()));
+        assertEq(address(0), address(erc721Mock.getHook(IERC721ACH.HookType.GetApproved)));
         bool isOwner = caller == DEFAULT_OWNER_ADDRESS;
         vm.prank(caller);
         if (!isOwner) {
             vm.expectRevert(IERC721ACH.Access_OnlyOwner.selector);
         }
-        erc721Mock.setGetApprovedHook(IGetApprovedHook(hook));
+        erc721Mock.setHook(IERC721ACH.HookType.GetApproved, hook);
         assertEq(
             isOwner ? hook : address(0),
-            address(erc721Mock.getApprovedHook())
+            address(erc721Mock.getHook(IERC721ACH.HookType.GetApproved))
         );
     }
 
     function test_isApprovedForAllHook(address hook, address caller) public {
-        assertEq(address(0), address(erc721Mock.isApprovedForAllHook()));
+        assertEq(address(0), address(erc721Mock.getHook(IERC721ACH.HookType.IsApprovedForAll)));
         bool isOwner = caller == DEFAULT_OWNER_ADDRESS;
         vm.prank(caller);
         if (!isOwner) {
             vm.expectRevert(IERC721ACH.Access_OnlyOwner.selector);
         }
-        erc721Mock.setIsApprovedForAllHook(IIsApprovedForAllHook(hook));
+        erc721Mock.setHook(IERC721ACH.HookType.IsApprovedForAll, hook);
         assertEq(
             isOwner ? hook : address(0),
-            address(erc721Mock.isApprovedForAllHook())
+            address(erc721Mock.getHook(IERC721ACH.HookType.IsApprovedForAll))
         );
     }
 }
