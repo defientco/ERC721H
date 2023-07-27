@@ -6,6 +6,8 @@ import {DSTest} from "ds-test/test.sol";
 import {ERC721ACHMock} from "../utils/ERC721ACHMock.sol";
 import {IERC721A} from "lib/ERC721A/contracts/IERC721A.sol";
 import {IsApprovedForAllHookMock} from "../utils/hooks/IsApprovedForAllHookMock.sol";
+import {IERC721ACH} from "../../src/interfaces/IERC721ACH.sol";
+
 
 contract IsApprovedForAllHookTest is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);
@@ -14,20 +16,23 @@ contract IsApprovedForAllHookTest is DSTest {
     ERC721ACHMock erc721Mock;
     IsApprovedForAllHookMock hookMock;
 
+
+    IERC721ACH.HookType constant IsApprovedForAll = IERC721ACH.HookType.IsApprovedForAll;
+
     function setUp() public {
         erc721Mock = new ERC721ACHMock(DEFAULT_OWNER_ADDRESS);
         hookMock = new IsApprovedForAllHookMock();
     }
 
     function test_isApprovedForAllHook() public {
-        assertEq(address(0), address(erc721Mock.isApprovedForAllHook()));
+        assertEq(address(0), address(erc721Mock.getHook(IsApprovedForAll)));
     }
 
     function test_setIsApprovedForAllHook() public {
-        assertEq(address(0), address(erc721Mock.isApprovedForAllHook()));
+        assertEq(address(0), address(erc721Mock.getHook(IsApprovedForAll)));
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        erc721Mock.setIsApprovedForAllHook(hookMock);
-        assertEq(address(hookMock), address(erc721Mock.isApprovedForAllHook()));
+        erc721Mock.setHook(IsApprovedForAll, address(hookMock));
+        assertEq(address(hookMock), address(erc721Mock.getHook(IsApprovedForAll)));
     }
 
     function test_isApprovedForAll(

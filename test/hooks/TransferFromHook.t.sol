@@ -6,6 +6,8 @@ import {DSTest} from "ds-test/test.sol";
 import {ERC721ACHMock} from "../utils/ERC721ACHMock.sol";
 import {IERC721A} from "lib/ERC721A/contracts/IERC721A.sol";
 import {TransferFromHookMock} from "../utils/hooks/TransferFromHookMock.sol";
+import {IERC721ACH} from "../../src/interfaces/IERC721ACH.sol";
+
 
 contract TransferFromTest is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);
@@ -14,20 +16,23 @@ contract TransferFromTest is DSTest {
     ERC721ACHMock erc721Mock;
     TransferFromHookMock hookMock;
 
+    // this is to simplify the long constant name
+    IERC721ACH.HookType constant TransferFrom = IERC721ACH.HookType.TransferFrom;
+
     function setUp() public {
         erc721Mock = new ERC721ACHMock(DEFAULT_OWNER_ADDRESS);
         hookMock = new TransferFromHookMock();
     }
 
     function test_transferFromHook() public {
-        assertEq(address(0), address(erc721Mock.transferFromHook()));
+        assertEq(address(0), address(erc721Mock.getHook(TransferFrom)));
     }
 
     function test_setTransferFromHook() public {
-        assertEq(address(0), address(erc721Mock.transferFromHook()));
+        assertEq(address(0), address(erc721Mock.getHook(TransferFrom)));
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        erc721Mock.setTransferFromHook(hookMock);
-        assertEq(address(hookMock), address(erc721Mock.transferFromHook()));
+        erc721Mock.setHook(TransferFrom, address(hookMock));
+        assertEq(address(hookMock), address(erc721Mock.getHook(TransferFrom)));
     }
 
     function test_transferFrom(uint256 _mintQuantity, uint256 _tokenId) public {
