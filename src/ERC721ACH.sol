@@ -24,17 +24,41 @@ import {IERC721ACH} from "./interfaces/IERC721ACH.sol";
  */
 contract ERC721ACH is ERC721AC, IERC721ACH {
     // TODO: how can we store these in a more efficient way?
-    IBalanceOfHook public balanceOfHook;
-    IOwnerOfHook public ownerOfHook;
-    ISafeTransferFromHook public safeTransferFromHook;
-    ITransferFromHook public transferFromHook;
-    IApproveHook public approveHook;
-    ISetApprovalForAllHook public setApprovalForAllHook;
-    IGetApprovedHook public getApprovedHook;
-    IIsApprovedForAllHook public isApprovedForAllHook;
-    IBeforeTokenTransfersHook public beforeTokenTransfersHook;
-    IAfterTokenTransfersHook public afterTokenTransfersHook;
-    IMintHook public mintHook;
+    
+    /**
+    * @dev Enumerated list of all available hook types for the ERC721ACH contract.
+    */
+    enum HookType {
+        /// @notice Hook for custom logic when querying the balance of an address.
+        BalanceOf,
+        /// @notice Hook for custom logic when querying the owner of a token.
+        OwnerOf,
+        /// @notice Hook for custom logic during a safe transfer.
+        SafeTransferFrom,
+        /// @notice Hook for custom logic during a transfer.
+        TransferFrom,
+        /// @notice Hook for custom logic when approving a token.
+        Approve,
+        /// @notice Hook for custom logic when setting approval for all tokens of an address.
+        SetApprovalForAll,
+        /// @notice Hook for custom logic when getting the approved address for a token.
+        GetApproved,
+        /// @notice Hook for custom logic when checking if an address is approved for all tokens of another address.
+        IsApprovedForAll,
+        /// @notice Hook for custom logic before a token transfer occurs.
+        BeforeTokenTransfers,
+        /// @notice Hook for custom logic after a token transfer occurs.
+        AfterTokenTransfers,
+        /// @notice Hook for custom logic during token minting.
+        Mint
+    }
+
+    /**
+    * @dev Mapping of hook types to their respective contract addresses.
+    * Each hook type can be associated with a contract that implements the hook's logic.
+    * Only the contract owner can set or update these hooks.
+    */
+    mapping(HookType => address) public hooks;
 
     /// @notice Contract constructor
     /// @param _contractName The name for the token contract
@@ -306,85 +330,95 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     /// ERC721H Admin Controls
     /////////////////////////////////////////////////
 
-    /// TODO
-    function setBalanceOfHook(IBalanceOfHook _hook) external virtual onlyOwner {
-        balanceOfHook = _hook;
-        emit UpdatedHookBalanceOf(msg.sender, address(_hook));
+    /**
+        * @notice Sets the contract address for a specified hook type.
+        * @param hookType The type of hook to set, as defined in the HookType enum.
+        * @param hookAddress The address of the contract implementing the hook interface.
+    */
+    function setHook(HookType hookType, address hookAddress) external virtual onlyOwner {
+        hooks[hookType] = hookAddress;
+        emit UpdatedHook(msg.sender, hookType, hookAddress);
     }
 
-    /// TODO
-    function setOwnerOfHook(IOwnerOfHook _hook) external virtual onlyOwner {
-        ownerOfHook = _hook;
-        emit UpdatedHookOwnerOf(msg.sender, address(_hook));
-    }
+    // /// TODO
+    // function setBalanceOfHook(IBalanceOfHook _hook) external virtual onlyOwner {
+    //     balanceOfHook = _hook;
+    //     emit UpdatedHookBalanceOf(msg.sender, address(_hook));
+    // }
 
-    /// TODO
-    function setSafeTransferFromHook(
-        ISafeTransferFromHook _hook
-    ) external virtual onlyOwner {
-        safeTransferFromHook = _hook;
-        emit UpdatedHookSafeTransferFrom(msg.sender, address(_hook));
-    }
+    // /// TODO
+    // function setOwnerOfHook(IOwnerOfHook _hook) external virtual onlyOwner {
+    //     ownerOfHook = _hook;
+    //     emit UpdatedHookOwnerOf(msg.sender, address(_hook));
+    // }
 
-    /// TODO
-    function setTransferFromHook(
-        ITransferFromHook _hook
-    ) external virtual onlyOwner {
-        transferFromHook = _hook;
-        emit UpdatedHookTransferFrom(msg.sender, address(_hook));
-    }
+    // /// TODO
+    // function setSafeTransferFromHook(
+    //     ISafeTransferFromHook _hook
+    // ) external virtual onlyOwner {
+    //     safeTransferFromHook = _hook;
+    //     emit UpdatedHookSafeTransferFrom(msg.sender, address(_hook));
+    // }
 
-    /// TODO
-    function setApproveHook(IApproveHook _hook) external virtual onlyOwner {
-        approveHook = _hook;
-        emit UpdatedHookApprove(msg.sender, address(_hook));
-    }
+    // /// TODO
+    // function setTransferFromHook(
+    //     ITransferFromHook _hook
+    // ) external virtual onlyOwner {
+    //     transferFromHook = _hook;
+    //     emit UpdatedHookTransferFrom(msg.sender, address(_hook));
+    // }
 
-    /// TODO
-    function setSetApprovalForAllHook(
-        ISetApprovalForAllHook _hook
-    ) external virtual onlyOwner {
-        setApprovalForAllHook = _hook;
-        emit UpdatedHookSetApprovalForAll(msg.sender, address(_hook));
-    }
+    // /// TODO
+    // function setApproveHook(IApproveHook _hook) external virtual onlyOwner {
+    //     approveHook = _hook;
+    //     emit UpdatedHookApprove(msg.sender, address(_hook));
+    // }
 
-    /// TODO
-    function setGetApprovedHook(
-        IGetApprovedHook _hook
-    ) external virtual onlyOwner {
-        getApprovedHook = _hook;
-        emit UpdatedHookGetApproved(msg.sender, address(_hook));
-    }
+    // /// TODO
+    // function setSetApprovalForAllHook(
+    //     ISetApprovalForAllHook _hook
+    // ) external virtual onlyOwner {
+    //     setApprovalForAllHook = _hook;
+    //     emit UpdatedHookSetApprovalForAll(msg.sender, address(_hook));
+    // }
 
-    /// TODO
-    function setIsApprovedForAllHook(
-        IIsApprovedForAllHook _hook
-    ) external virtual onlyOwner {
-        isApprovedForAllHook = _hook;
-        emit UpdatedHookIsApprovedForAll(msg.sender, address(_hook));
-    }
+    // /// TODO
+    // function setGetApprovedHook(
+    //     IGetApprovedHook _hook
+    // ) external virtual onlyOwner {
+    //     getApprovedHook = _hook;
+    //     emit UpdatedHookGetApproved(msg.sender, address(_hook));
+    // }
 
-    /// TODO
-    function setBeforeTokenTransfersHook(
-        IBeforeTokenTransfersHook _hook
-    ) external virtual onlyOwner {
-        beforeTokenTransfersHook = _hook;
-        emit UpdatedHookBeforeTokenTransfers(msg.sender, address(_hook));
-    }
+    // /// TODO
+    // function setIsApprovedForAllHook(
+    //     IIsApprovedForAllHook _hook
+    // ) external virtual onlyOwner {
+    //     isApprovedForAllHook = _hook;
+    //     emit UpdatedHookIsApprovedForAll(msg.sender, address(_hook));
+    // }
 
-    function setAfterTokenTransfersHook(
-        IAfterTokenTransfersHook _hook
-    ) external virtual onlyOwner {
-        afterTokenTransfersHook = _hook;
-        emit UpdatedHookAfterTokenTransfers(msg.sender, address(_hook));
-    } 
+    // /// TODO
+    // function setBeforeTokenTransfersHook(
+    //     IBeforeTokenTransfersHook _hook
+    // ) external virtual onlyOwner {
+    //     beforeTokenTransfersHook = _hook;
+    //     emit UpdatedHookBeforeTokenTransfers(msg.sender, address(_hook));
+    // }
 
-    function setMintHook(
-        IMintHook _hook
-    ) external virtual onlyOwner {
-        mintHook = _hook;
-        emit UpdatedHookMint(msg.sender, address(_hook));
-    }
+    // function setAfterTokenTransfersHook(
+    //     IAfterTokenTransfersHook _hook
+    // ) external virtual onlyOwner {
+    //     afterTokenTransfersHook = _hook;
+    //     emit UpdatedHookAfterTokenTransfers(msg.sender, address(_hook));
+    // } 
+
+    // function setMintHook(
+    //     IMintHook _hook
+    // ) external virtual onlyOwner {
+    //     mintHook = _hook;
+    //     emit UpdatedHookMint(msg.sender, address(_hook));
+    // }
 
 
     /// TODO
