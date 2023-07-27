@@ -19,7 +19,7 @@ interface IERC721ACH {
     /**
         * @dev Enumerated list of all available hook types for the ERC721ACH contract.
     */
-    enum HookType {
+     enum HookType {
         /// @notice Hook for custom logic when querying the balance of an address.
         BalanceOf,
         /// @notice Hook for custom logic when querying the owner of a token.
