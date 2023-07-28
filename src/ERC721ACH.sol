@@ -95,30 +95,6 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     }
 
 
-
-    /////////////////////////////////////////////////
-    /// ERC721 Hooks
-    /////////////////////////////////////////////////
-
-    /// @notice isApprovedForAll Hook for custom implementation.
-    /// @param owner The address that owns the NFTs
-    /// @param operator The address that acts on behalf of the owner
-    /// @dev Returns whether an operator is approved by a given owner
-    function _isApprovedForAllHook(
-        address owner,
-        address operator
-    ) internal view virtual returns (bool) {}
-
-    /// @notice Check if the isApprovedForAll function should use hook.
-    /// @param owner The address that owns the NFTs
-    /// @param operator The address that acts on behalf of the owner
-    /// @dev Returns whether or not to use the hook for isApprovedForAll function
-    function _useIsApprovedForAllHook(
-        address owner,
-        address operator
-    ) internal view virtual returns (bool) {}
-
-
     /**
         * @notice Returns the contract address for a specified hook type.
         * @param hookType The type of hook to retrieve, as defined in the HookType enum.
