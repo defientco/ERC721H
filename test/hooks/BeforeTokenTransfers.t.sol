@@ -6,6 +6,8 @@ import {DSTest} from "ds-test/test.sol";
 import {ERC721ACHMock} from "../utils/ERC721ACHMock.sol";
 import {IERC721A} from "lib/ERC721A/contracts/IERC721A.sol";
 import {BeforeTokenTransfersHookMock} from "../utils/hooks/BeforeTokenTransfersHookMock.sol";
+import {IERC721ACH} from "../../src/interfaces/IERC721ACH.sol";
+
 
 contract BeforeTokenTransfersHookTest is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);
@@ -14,25 +16,27 @@ contract BeforeTokenTransfersHookTest is DSTest {
     ERC721ACHMock erc721Mock;
     BeforeTokenTransfersHookMock hookMock;
 
+    IERC721ACH.HookType constant BeforeTokenTransfers = IERC721ACH.HookType.BeforeTokenTransfers;
+
     function setUp() public {
         erc721Mock = new ERC721ACHMock(DEFAULT_OWNER_ADDRESS);
         hookMock = new BeforeTokenTransfersHookMock();
     }
 
     function test_beforeTokenTransfersHook() public {
-        assertEq(address(0), address(erc721Mock.beforeTokenTransfersHook()));
+        assertEq(address(0), address(erc721Mock.getHook(BeforeTokenTransfers)));
     }
 
     function test_setBeforeTokenTransfersHook() public {
-        assertEq(address(0), address(erc721Mock.beforeTokenTransfersHook()));
+        assertEq(address(0), address(erc721Mock.getHook(BeforeTokenTransfers)));
 
         // calling an admin function without being the contract owner should revert       
         vm.expectRevert();
-        erc721Mock.setBeforeTokenTransfersHook(hookMock);
+        erc721Mock.setHook(BeforeTokenTransfers, address(hookMock));
         
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        erc721Mock.setBeforeTokenTransfersHook(hookMock);
-        assertEq(address(hookMock), address(erc721Mock.beforeTokenTransfersHook()));
+        erc721Mock.setHook(BeforeTokenTransfers, address(hookMock));
+        assertEq(address(hookMock), address(erc721Mock.getHook(BeforeTokenTransfers)));
     }
 
     function test_beforeTokenTransfersHook(

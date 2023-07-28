@@ -12,8 +12,8 @@ import {ISetApprovalForAllHook} from "./interfaces/ISetApprovalForAllHook.sol";
 import {IGetApprovedHook} from "./interfaces/IGetApprovedHook.sol";
 import {IIsApprovedForAllHook} from "./interfaces/IIsApprovedForAllHook.sol";
 import {IBeforeTokenTransfersHook} from "./interfaces/IBeforeTokenTransfersHook.sol";
-
 import {IAfterTokenTransfersHook} from "./interfaces/IAfterTokenTransfersHook.sol";
+import {IMintHook} from "./interfaces/IMintHook.sol";
 import {IERC721ACH} from "./interfaces/IERC721ACH.sol";
 
 /**
@@ -24,16 +24,17 @@ import {IERC721ACH} from "./interfaces/IERC721ACH.sol";
  */
 contract ERC721ACH is ERC721AC, IERC721ACH {
     // TODO: how can we store these in a more efficient way?
-    IBalanceOfHook public balanceOfHook;
-    IOwnerOfHook public ownerOfHook;
-    ISafeTransferFromHook public safeTransferFromHook;
-    ITransferFromHook public transferFromHook;
-    IApproveHook public approveHook;
-    ISetApprovalForAllHook public setApprovalForAllHook;
-    IGetApprovedHook public getApprovedHook;
-    IIsApprovedForAllHook public isApprovedForAllHook;
-    IBeforeTokenTransfersHook public beforeTokenTransfersHook;
-    IAfterTokenTransfersHook public afterTokenTransfersHook;
+    
+    /**
+    * @dev Mapping of hook types to their respective contract addresses.
+    * Each hook type can be associated with a contract that implements the hook's logic.
+    * Only the contract owner can set or update these hooks.
+    */
+    mapping(HookType => address) public hooks;
+
+
+    event UpdatedHook(address indexed setter, HookType hookType, address indexed hookAddress);
+
 
     /// @notice Contract constructor
     /// @param _contractName The name for the token contract
@@ -55,22 +56,21 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     /////////////////////////////////////////////////
 
     /// @inheritdoc IERC721A
-    function balanceOf(
-        address owner
-    ) public view virtual override returns (uint256) {
-        if (
-            address(balanceOfHook) != address(0) &&
-            balanceOfHook.useBalanceOfHook(owner)
-        ) {
-            return balanceOfHook.balanceOfOverrideHook(owner);
-        }
-        return super.balanceOf(owner);
+    function balanceOf(address owner) public view virtual override returns (uint256) {
+    IBalanceOfHook balanceOfHookInstance = IBalanceOfHook(hooks[HookType.BalanceOf]);
+    
+    if (address(balanceOfHookInstance) != address(0) && balanceOfHookInstance.useBalanceOfHook(owner)) {
+        return balanceOfHookInstance.balanceOfOverrideHook(owner);
     }
+    return super.balanceOf(owner);
+}
+
 
     /// @inheritdoc IERC721A
     function ownerOf(
         uint256 tokenId
     ) public view virtual override returns (address) {
+        IOwnerOfHook ownerOfHook = IOwnerOfHook(hooks[HookType.OwnerOf]);
         if (
             address(ownerOfHook) != address(0) &&
             ownerOfHook.useOwnerOfHook(tokenId)
@@ -85,6 +85,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         address approved,
         uint256 tokenId
     ) public payable virtual override {
+        IApproveHook approveHook = IApproveHook(hooks[HookType.Approve]);
         if (
             address(approveHook) != address(0) &&
             approveHook.useApproveHook(approved, tokenId)
@@ -100,6 +101,9 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         address operator,
         bool approved
     ) public virtual override {
+
+        ISetApprovalForAllHook setApprovalForAllHook = ISetApprovalForAllHook(hooks[HookType.SetApprovalForAll]);
+
         if (
             address(setApprovalForAllHook) != address(0) &&
             setApprovalForAllHook.useSetApprovalForAllHook(
@@ -122,6 +126,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     function getApproved(
         uint256 tokenId
     ) public view virtual override returns (address) {
+        IGetApprovedHook getApprovedHook = IGetApprovedHook(hooks[HookType.GetApproved]);
         if (
             address(getApprovedHook) != address(0) &&
             getApprovedHook.useGetApprovedHook(tokenId)
@@ -136,6 +141,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         address owner,
         address operator
     ) public view virtual override returns (bool) {
+        IIsApprovedForAllHook isApprovedForAllHook = IIsApprovedForAllHook(hooks[HookType.IsApprovedForAll]);
         if (
             address(isApprovedForAllHook) != address(0) &&
             isApprovedForAllHook.useIsApprovedForAllHook(owner, operator)
@@ -155,6 +161,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         address to,
         uint256 tokenId
     ) public payable virtual override {
+        ITransferFromHook transferFromHook = ITransferFromHook(hooks[HookType.TransferFrom]);
         if (
             address(transferFromHook) != address(0) &&
             transferFromHook.useTransferFromHook(from, to, tokenId)
@@ -191,6 +198,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         uint256 tokenId,
         bytes memory data
     ) internal {
+        ISafeTransferFromHook safeTransferFromHook = ISafeTransferFromHook(hooks[HookType.SafeTransferFrom]);
         if (
             address(safeTransferFromHook) != address(0) &&
             safeTransferFromHook.useSafeTransferFromHook(
@@ -213,13 +221,14 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         }
     }
 
-    
+    /// TODO
     function _beforeTokenTransfers(
         address from,
         address to,
         uint256 startTokenId,
         uint256 quantity
     ) internal virtual override {
+        IBeforeTokenTransfersHook beforeTokenTransfersHook = IBeforeTokenTransfersHook(hooks[HookType.BeforeTokenTransfers]);
         if (
             address(beforeTokenTransfersHook) != address(0) &&
             beforeTokenTransfersHook.useBeforeTokenTransfersHook(from, to, startTokenId, quantity)
@@ -235,12 +244,14 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         }
     }
 
+    /// TODO
     function _afterTokenTransfers(
         address from,
         address to,
         uint256 startTokenId,
         uint256 quantity
     ) internal virtual override {
+        IAfterTokenTransfersHook afterTokenTransfersHook = IAfterTokenTransfersHook(hooks[HookType.AfterTokenTransfers]);
         if (
             address(afterTokenTransfersHook) != address(0) &&
             afterTokenTransfersHook.useAfterTokenTransfersHook(from, to, startTokenId, quantity)
@@ -253,6 +264,22 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
             );
         } else {
             super._afterTokenTransfers(from, to, startTokenId, quantity);
+        }
+    }
+
+    /// TODO
+    function _mint(
+        address to,
+        uint256 tokenId
+    ) internal virtual override {
+        IMintHook mintHook = IMintHook(hooks[HookType.Mint]);
+        if (
+            address(mintHook) != address(0) &&
+            mintHook.useMintHook(to, tokenId)
+        ) {
+            mintHook.mintOverrideHook(to, tokenId);
+        } else {
+            super._mint(to, tokenId);
         }
     }
 
@@ -278,6 +305,16 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         address operator
     ) internal view virtual returns (bool) {}
 
+
+    /**
+        * @notice Returns the contract address for a specified hook type.
+        * @param hookType The type of hook to retrieve, as defined in the HookType enum.
+        * @return The address of the contract implementing the hook interface.
+    */
+    function getHook(HookType hookType) external view returns (address) {
+        return hooks[hookType];
+    }
+
     /////////////////////////////////////////////////
     /// ERC721C Override
     /////////////////////////////////////////////////
@@ -289,78 +326,16 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     /// ERC721H Admin Controls
     /////////////////////////////////////////////////
 
-    /// TODO
-    function setBalanceOfHook(IBalanceOfHook _hook) external virtual onlyOwner {
-        balanceOfHook = _hook;
-        emit UpdatedHookBalanceOf(msg.sender, address(_hook));
+    /**
+        * @notice Sets the contract address for a specified hook type.
+        * @param hookType The type of hook to set, as defined in the HookType enum.
+        * @param hookAddress The address of the contract implementing the hook interface.
+    */
+    function setHook(HookType hookType, address hookAddress) external virtual onlyOwner {
+        hooks[hookType] = hookAddress;
+        emit UpdatedHook(msg.sender, hookType, hookAddress);
     }
 
-    /// TODO
-    function setOwnerOfHook(IOwnerOfHook _hook) external virtual onlyOwner {
-        ownerOfHook = _hook;
-        emit UpdatedHookOwnerOf(msg.sender, address(_hook));
-    }
-
-    /// TODO
-    function setSafeTransferFromHook(
-        ISafeTransferFromHook _hook
-    ) external virtual onlyOwner {
-        safeTransferFromHook = _hook;
-        emit UpdatedHookSafeTransferFrom(msg.sender, address(_hook));
-    }
-
-    /// TODO
-    function setTransferFromHook(
-        ITransferFromHook _hook
-    ) external virtual onlyOwner {
-        transferFromHook = _hook;
-        emit UpdatedHookTransferFrom(msg.sender, address(_hook));
-    }
-
-    /// TODO
-    function setApproveHook(IApproveHook _hook) external virtual onlyOwner {
-        approveHook = _hook;
-        emit UpdatedHookApprove(msg.sender, address(_hook));
-    }
-
-    /// TODO
-    function setSetApprovalForAllHook(
-        ISetApprovalForAllHook _hook
-    ) external virtual onlyOwner {
-        setApprovalForAllHook = _hook;
-        emit UpdatedHookSetApprovalForAll(msg.sender, address(_hook));
-    }
-
-    /// TODO
-    function setGetApprovedHook(
-        IGetApprovedHook _hook
-    ) external virtual onlyOwner {
-        getApprovedHook = _hook;
-        emit UpdatedHookGetApproved(msg.sender, address(_hook));
-    }
-
-    /// TODO
-    function setIsApprovedForAllHook(
-        IIsApprovedForAllHook _hook
-    ) external virtual onlyOwner {
-        isApprovedForAllHook = _hook;
-        emit UpdatedHookIsApprovedForAll(msg.sender, address(_hook));
-    }
-
-    /// TODO
-    function setBeforeTokenTransfersHook(
-        IBeforeTokenTransfersHook _hook
-    ) external virtual onlyOwner {
-        beforeTokenTransfersHook = _hook;
-        emit UpdatedHookBeforeTokenTransfers(msg.sender, address(_hook));
-    }
-
-    function setAfterTokenTransfersHook(
-        IAfterTokenTransfersHook _hook
-    ) external virtual onlyOwner {
-        afterTokenTransfersHook = _hook;
-        emit UpdatedHookAfterTokenTransfers(msg.sender, address(_hook));
-    } 
 
 
     /// TODO

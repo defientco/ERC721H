@@ -6,6 +6,10 @@ import {DSTest} from "ds-test/test.sol";
 import {ERC721ACHMock} from "../utils/ERC721ACHMock.sol";
 import {IERC721A} from "lib/ERC721A/contracts/IERC721A.sol";
 import {SetApprovalForAllHookMock} from "../utils/hooks/SetApprovalForAllHookMock.sol";
+import {IERC721ACH} from "../../src/interfaces/IERC721ACH.sol";
+
+
+
 
 contract SetApprovalForAllHookTest is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);
@@ -14,22 +18,25 @@ contract SetApprovalForAllHookTest is DSTest {
     ERC721ACHMock erc721Mock;
     SetApprovalForAllHookMock hookMock;
 
+    // this is to simplify the long constant name
+    IERC721ACH.HookType constant SetApprovalForAll = IERC721ACH.HookType.SetApprovalForAll;
+
     function setUp() public {
         erc721Mock = new ERC721ACHMock(DEFAULT_OWNER_ADDRESS);
         hookMock = new SetApprovalForAllHookMock();
     }
 
     function test_setApprovalForAllHookHook() public {
-        assertEq(address(0), address(erc721Mock.setApprovalForAllHook()));
+        assertEq(address(0), address(erc721Mock.getHook(SetApprovalForAll)));
     }
 
     function test_setSetApprovalForAllHook() public {
-        assertEq(address(0), address(erc721Mock.setApprovalForAllHook()));
+        assertEq(address(0), address(erc721Mock.getHook(SetApprovalForAll)));
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        erc721Mock.setSetApprovalForAllHook(hookMock);
+        erc721Mock.setHook(SetApprovalForAll, address(hookMock));
         assertEq(
             address(hookMock),
-            address(erc721Mock.setApprovalForAllHook())
+            address(erc721Mock.getHook(SetApprovalForAll))
         );
     }
 

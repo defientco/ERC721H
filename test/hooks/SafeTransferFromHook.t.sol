@@ -7,6 +7,9 @@ import {ERC721ACHMock} from "../utils/ERC721ACHMock.sol";
 import {IERC721A} from "lib/ERC721A/contracts/IERC721A.sol";
 import {SafeTransferFromHookMock} from "../utils/hooks/SafeTransferFromHookMock.sol";
 
+import {IERC721ACH} from "../../src/interfaces/IERC721ACH.sol";
+
+
 contract SafeTransferFromTest is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);
     address public constant DEFAULT_OWNER_ADDRESS = address(0x23499);
@@ -14,20 +17,23 @@ contract SafeTransferFromTest is DSTest {
     ERC721ACHMock erc721Mock;
     SafeTransferFromHookMock hookMock;
 
+    // this is to simplify the long constant name
+    IERC721ACH.HookType constant SafeTransferFrom = IERC721ACH.HookType.SafeTransferFrom;
+
     function setUp() public {
         erc721Mock = new ERC721ACHMock(DEFAULT_OWNER_ADDRESS);
         hookMock = new SafeTransferFromHookMock();
     }
 
     function test_safeTransferFromHook() public {
-        assertEq(address(0), address(erc721Mock.safeTransferFromHook()));
+        assertEq(address(0), address(erc721Mock.getHook(SafeTransferFrom)));
     }
 
     function test_setSafeTransferFromHook() public {
-        assertEq(address(0), address(erc721Mock.safeTransferFromHook()));
+        assertEq(address(0), address(erc721Mock.getHook(SafeTransferFrom)));
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        erc721Mock.setSafeTransferFromHook(hookMock);
-        assertEq(address(hookMock), address(erc721Mock.safeTransferFromHook()));
+        erc721Mock.setHook(SafeTransferFrom, address(hookMock));
+        assertEq(address(hookMock), address(erc721Mock.getHook(SafeTransferFrom)));
     }
 
     function test_safeTransferFrom_WithData(

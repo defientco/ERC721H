@@ -14,93 +14,49 @@ interface IERC721ACH {
     /// @notice error onlyOwner
     error Access_OnlyOwner();
 
-    /// @notice Emitted when balanceOf hook is set
-    /// @param caller The caller
-    /// @param hook The new hook
-    event UpdatedHookBalanceOf(address indexed caller, address indexed hook);
+    /// think do we also need events here 🤔
 
-    /// @notice Emitted when ownerOf hook is set
-    /// @param caller The caller
-    /// @param hook The new hook
-    event UpdatedHookOwnerOf(address indexed caller, address indexed hook);
-
-    /// @notice Emitted when safeTransferFrom hook is set
-    /// @param caller The caller
-    /// @param hook The new hook
-    event UpdatedHookSafeTransferFrom(
-        address indexed caller,
-        address indexed hook
-    );
-
-    /// @notice Emitted when transferFrom hook is set
-    /// @param caller The caller
-    /// @param hook The new hook
-    event UpdatedHookTransferFrom(address indexed caller, address indexed hook);
-
-    /// @notice Emitted when approve hook is set
-    /// @param caller The caller
-    /// @param hook The new hook
-    event UpdatedHookApprove(address indexed caller, address indexed hook);
-
-    /// @notice Emitted when setApprovalForAll hook is set
-    /// @param caller The caller
-    /// @param hook The new hook
-    event UpdatedHookSetApprovalForAll(
-        address indexed caller,
-        address indexed hook
-    );
-
-    /// @notice Emitted when getApproved hook is set
-    /// @param caller The caller
-    /// @param hook The new hook
-    event UpdatedHookGetApproved(address indexed caller, address indexed hook);
-
-    /// @notice Emitted when isApprovedForAll hook is set
-    /// @param caller The caller
-    /// @param hook The new hook
-    event UpdatedHookIsApprovedForAll(
-        address indexed caller,
-        address indexed hook
-    );
-
-    /// @notice Emitted when setBeforeTokenTransfers hook is set
-    /// @param caller The caller
-    /// @param hook The new hook
-    event UpdatedHookBeforeTokenTransfers(
-        address indexed caller,
-        address indexed hook
-    );
-
-    /// @notice Emitted when setBeforeTokenTransfers hook is set
-    /// @param caller The caller
-    /// @param hook The new hook
-    event UpdatedHookAfterTokenTransfers(
-        address indexed caller,
-        address indexed hook
-    );
+    /**
+        * @dev Enumerated list of all available hook types for the ERC721ACH contract.
+    */
+     enum HookType {
+        /// @notice Hook for custom logic when querying the balance of an address.
+        BalanceOf,
+        /// @notice Hook for custom logic when querying the owner of a token.
+        OwnerOf,
+        /// @notice Hook for custom logic during a safe transfer.
+        SafeTransferFrom,
+        /// @notice Hook for custom logic during a transfer.
+        TransferFrom,
+        /// @notice Hook for custom logic when approving a token.
+        Approve,
+        /// @notice Hook for custom logic when setting approval for all tokens of an address.
+        SetApprovalForAll,
+        /// @notice Hook for custom logic when getting the approved address for a token.
+        GetApproved,
+        /// @notice Hook for custom logic when checking if an address is approved for all tokens of another address.
+        IsApprovedForAll,
+        /// @notice Hook for custom logic before a token transfer occurs.
+        BeforeTokenTransfers,
+        /// @notice Hook for custom logic after a token transfer occurs.
+        AfterTokenTransfers,
+        /// @notice Hook for custom logic during token minting.
+        Mint
+    }
 
 
-    /// TODO
-    function setBalanceOfHook(IBalanceOfHook _hook) external;
+    /**
+     * @notice Sets the contract address for a specified hook type.
+     * @param hookType The type of hook to set, as defined in the HookType enum.
+     * @param hookAddress The address of the contract implementing the hook interface.
+     */
+    function setHook(HookType hookType, address hookAddress) external;
 
-    /// TODO
-    function setOwnerOfHook(IOwnerOfHook _hook) external;
+    /**
+     * @notice Returns the contract address for a specified hook type.
+     * @param hookType The type of hook to set, as defined in the HookType enum.
+     * @return The address of the contract implementing the hook interface.
+     */
+    function getHook(HookType hookType) external view returns (address);
 
-    /// TODO
-    function setSafeTransferFromHook(ISafeTransferFromHook _hook) external;
-
-    /// TODO
-    function setTransferFromHook(ITransferFromHook _hook) external;
-
-    /// TODO
-    function setApproveHook(IApproveHook _hook) external;
-
-    /// TODO
-    function setSetApprovalForAllHook(ISetApprovalForAllHook _hook) external;
-
-    /// TODO
-    function setGetApprovedHook(IGetApprovedHook _hook) external;
-
-    /// TODO
-    function setIsApprovedForAllHook(IIsApprovedForAllHook _hook) external;
 }

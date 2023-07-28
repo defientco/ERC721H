@@ -6,6 +6,7 @@ import {DSTest} from "ds-test/test.sol";
 import {ERC721ACHMock} from "../utils/ERC721ACHMock.sol";
 import {IERC721A} from "lib/ERC721A/contracts/IERC721A.sol";
 import {GetApprovedHookMock} from "../utils/hooks/GetApprovedHookMock.sol";
+import {IERC721ACH} from "../../src/interfaces/IERC721ACH.sol";
 
 contract GetApprovedHookTest is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);
@@ -14,20 +15,22 @@ contract GetApprovedHookTest is DSTest {
     ERC721ACHMock erc721Mock;
     GetApprovedHookMock hookMock;
 
+    IERC721ACH.HookType constant GetApproved = IERC721ACH.HookType.GetApproved;
+
     function setUp() public {
         erc721Mock = new ERC721ACHMock(DEFAULT_OWNER_ADDRESS);
         hookMock = new GetApprovedHookMock();
     }
 
     function test_getApprovedHook() public {
-        assertEq(address(0), address(erc721Mock.getApprovedHook()));
+        assertEq(address(0), address(erc721Mock.getHook(GetApproved)));
     }
 
     function test_setGetApprovedHook() public {
-        assertEq(address(0), address(erc721Mock.getApprovedHook()));
+        assertEq(address(0), address(erc721Mock.getHook(GetApproved)));
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        erc721Mock.setGetApprovedHook(hookMock);
-        assertEq(address(hookMock), address(erc721Mock.getApprovedHook()));
+        erc721Mock.setHook(GetApproved, address(hookMock));
+        assertEq(address(hookMock), address(erc721Mock.getHook(GetApproved)));
     }
 
     function test_getApproved(uint256 _mintQuantity, uint256 _tokenId) public {
