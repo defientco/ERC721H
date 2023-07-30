@@ -4,7 +4,7 @@ pragma solidity ^0.8.15;
 
 interface IERC721ACH {
     /// @notice error onlyOwner
-    error Access_OnlyOwner();
+    // error Access_OnlyOwner();
 
     /**
         * @dev Enumerated list of all available hook types for the ERC721ACH contract.
