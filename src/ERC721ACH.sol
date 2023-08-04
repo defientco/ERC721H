@@ -67,9 +67,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
                 startTokenId,
                 quantity
             );
-        } else {
-            super._beforeTokenTransfers(from, to, startTokenId, quantity);
-        }
+        } 
     }
 
     /// TODO
@@ -92,9 +90,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
                 startTokenId,
                 quantity
             );
-        } else {
-            super._afterTokenTransfers(from, to, startTokenId, quantity);
-        }
+        } 
     }
 
 
