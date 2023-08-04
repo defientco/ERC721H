@@ -7,6 +7,8 @@ contract ERC721ACHMock is ERC721ACH {
     bool public hooksEnabled;
     address public owner;
 
+    error Access_OnlyOwner();
+
     constructor(address _owner) ERC721ACH("ERC-721ACH Mock", "MOCK") {
         owner = _owner;
     }

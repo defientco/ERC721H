@@ -55,6 +55,7 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         uint256 startTokenId,
         uint256 quantity
     ) internal virtual override {
+        super._beforeTokenTransfers(from, to, startTokenId, quantity);
         IBeforeTokenTransfersHook beforeTokenTransfersHook = IBeforeTokenTransfersHook(hooks[HookType.BeforeTokenTransfers]);
         if (
             address(beforeTokenTransfersHook) != address(0) &&
@@ -78,6 +79,8 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         uint256 startTokenId,
         uint256 quantity
     ) internal virtual override {
+
+        super._afterTokenTransfers(from, to, startTokenId, quantity);
         IAfterTokenTransfersHook afterTokenTransfersHook = IAfterTokenTransfersHook(hooks[HookType.AfterTokenTransfers]);
         if (
             address(afterTokenTransfersHook) != address(0) &&
