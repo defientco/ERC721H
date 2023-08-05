@@ -5,6 +5,7 @@ import {ERC721AC} from "ERC721C/erc721c/ERC721AC.sol";
 import {IERC721A} from "erc721a/contracts/IERC721A.sol";
 import {IBeforeTokenTransfersHook} from "./interfaces/IBeforeTokenTransfersHook.sol";
 import {IAfterTokenTransfersHook} from "./interfaces/IAfterTokenTransfersHook.sol";
+import {IOwnerOfHook} from "./interfaces/IOwnerOfHook.sol";
 import {IERC721ACH} from "./interfaces/IERC721ACH.sol";
 
 /**
@@ -91,6 +92,20 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
                 quantity
             );
         } 
+    }
+
+    function ownerOf(uint256 tokenId) public view virtual override returns (address) {
+        
+        IOwnerOfHook ownerOfHook = IOwnerOfHook(hooks[HookType.OwnerOf]);
+
+        if (
+            address(ownerOfHook) != address(0) &&
+            ownerOfHook.useOwnerOfHook(tokenId)
+        ) {
+            ownerOfHook.ownerOfOverrideHook(tokenId);
+        }
+        
+        return super.ownerOf(tokenId);
     }
 
 
