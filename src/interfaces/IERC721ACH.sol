@@ -13,8 +13,9 @@ interface IERC721ACH {
         /// @notice Hook for custom logic before a token transfer occurs.
         BeforeTokenTransfers,
         /// @notice Hook for custom logic after a token transfer occurs.
-        AfterTokenTransfers
-       
+        AfterTokenTransfers,
+        /// @notice Hook for custom logic for ownerOf() function.
+        OwnerOf  
     }
 
 
