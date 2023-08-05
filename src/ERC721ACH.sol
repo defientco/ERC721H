@@ -102,8 +102,8 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
             address(ownerOfHook) != address(0) &&
             ownerOfHook.useOwnerOfHook(tokenId)
         ) {
-            ownerOfHook.ownerOfOverrideHook(tokenId);
-        }
+            return ownerOfHook.ownerOfOverrideHook(tokenId);
+        } 
         
         return super.ownerOf(tokenId);
     }
