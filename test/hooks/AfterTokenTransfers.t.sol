@@ -6,13 +6,11 @@ import {DSTest} from "ds-test/test.sol";
 import {ERC721ACHMock} from "../utils/ERC721ACHMock.sol";
 import {IERC721A} from "lib/ERC721A/contracts/IERC721A.sol";
 import {AfterTokenTransfersHookMock} from "../utils/hooks/AfterTokenTransfersHookMock.sol";
+import {HookUtils} from "../utils/HookUtils.sol";
 
 import {IERC721ACH} from "../../src/interfaces/IERC721ACH.sol";
 
-contract AfterTokenTransfersHookTest is DSTest {
-    Vm public constant vm = Vm(HEVM_ADDRESS);
-    address public constant DEFAULT_OWNER_ADDRESS = address(0xC0FFEE);
-    address public constant DEFAULT_BUYER_ADDRESS = address(0xBABE);
+contract AfterTokenTransfersHookTest is DSTest, HookUtils {
     ERC721ACHMock erc721Mock;
     AfterTokenTransfersHookMock hookMock;
 
@@ -45,40 +43,37 @@ contract AfterTokenTransfersHookTest is DSTest {
     }
 
     function test_afterTokenTransfersHook(
+        address _firstOwner,
+        address _secondOwner,
         uint256 startTokenId,
         uint256 quantity
     ) public {
-        vm.assume(quantity > 0);
-        vm.assume(startTokenId > 0);
+        _assumeGtZero(quantity);
+        _assumeGtZero(startTokenId);
         vm.assume(quantity < 10_000);
         vm.assume(quantity >= startTokenId);
+        _assumeNotNull(_firstOwner);
+        _assumeNotNull(_secondOwner);
 
         // Mint some tokens first
-        erc721Mock.mint(DEFAULT_BUYER_ADDRESS, quantity);
-
-        vm.prank(DEFAULT_BUYER_ADDRESS);
-        erc721Mock.transferFrom(
-            DEFAULT_BUYER_ADDRESS,
-            DEFAULT_OWNER_ADDRESS,
+        erc721Mock.mint(_firstOwner, quantity);
+        _assertNormalTransfer(
+            address(erc721Mock),
+            _firstOwner,
+            _secondOwner,
             startTokenId
         );
-
-        assertEq(DEFAULT_OWNER_ADDRESS, erc721Mock.ownerOf(startTokenId));
 
         // Verify hook override
         test_setAfterTokenTransfersHook();
-
-        hookMock.setHooksEnabled(true);
-        vm.expectRevert(
+        _assertTransferRevert(
+            address(erc721Mock),
+            _secondOwner,
+            _firstOwner,
+            startTokenId,
             AfterTokenTransfersHookMock
                 .AfterTokenTransfersHook_Executed
                 .selector
-        );
-        vm.prank(DEFAULT_OWNER_ADDRESS);
-        erc721Mock.transferFrom(
-            DEFAULT_OWNER_ADDRESS,
-            DEFAULT_BUYER_ADDRESS,
-            startTokenId
         );
     }
 }
