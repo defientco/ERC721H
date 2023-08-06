@@ -100,13 +100,10 @@ contract ERC721ACH is IERC721ACH, ERC721AC {
     function ownerOf(
         uint256 tokenId
     ) public view virtual override returns (address) {
-        IOwnerOfHook ownerOfHook = IOwnerOfHook(hooks[HookType.OwnerOf]);
+        IOwnerOfHook hook = IOwnerOfHook(hooks[HookType.OwnerOf]);
 
-        if (
-            address(ownerOfHook) != address(0) &&
-            ownerOfHook.useOwnerOfHook(tokenId)
-        ) {
-            return ownerOfHook.ownerOfOverrideHook(tokenId);
+        if (address(hook) != address(0) && hook.useOwnerOfHook(tokenId)) {
+            return hook.ownerOfOverrideHook(tokenId);
         }
 
         return super.ownerOf(tokenId);
