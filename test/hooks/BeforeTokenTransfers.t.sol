@@ -14,7 +14,6 @@ contract BeforeTokenTransfersHookTest is DSTest {
     address public constant DEFAULT_BUYER_ADDRESS = address(0xBABE);
     ERC721ACHMock erc721Mock;
     BeforeTokenTransfersHookMock hookMock;
-
     IERC721ACH.HookType constant BeforeTokenTransfers =
         IERC721ACH.HookType.BeforeTokenTransfers;
 
