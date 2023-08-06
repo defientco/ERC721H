@@ -39,25 +39,39 @@ contract OwnerOfHookTest is DSTest, HookUtils {
         vm.assume(tokenId < 10);
         _assumeNotNull(_buyer);
 
-        test_setOwnerOfHook();
         erc721Mock.mint(_buyer, tokenId);
         _assertOwner(address(erc721Mock), _buyer, tokenId);
 
         // override
-        hookMock.setHooksEnabled(true);
+        test_setOwnerOfHook();
         _assertOwner(address(erc721Mock), address(0), tokenId);
     }
 
-    function test_turn_off_hook(address _buyer, uint256 tokenId) public {
+    function test_ownerOfHook_revert(address _buyer, uint256 tokenId) public {
         test_ownerOfHook(_buyer, tokenId);
-
-        // turn off hook
-        hookMock.setHooksEnabled(false);
-        _assertOwner(address(erc721Mock), _buyer, tokenId);
-
-        // TODO: put this into it's own test
+        // revert
         hookMock.setRevertOwnerOfOverrideHook(true);
         vm.expectRevert(OwnerOfHookMock.OwnerOfHook_Executed.selector);
         erc721Mock.ownerOf(tokenId);
+    }
+
+    function test_turn_off_hook(address _buyer, uint256 tokenId) public {
+        //  test normal override
+        test_ownerOfHook(_buyer, tokenId);
+
+        // turn off hook
+        _turnOffOwnerOfHook();
+        _assertOwner(address(erc721Mock), _buyer, tokenId);
+
+        // test revert override
+        test_ownerOfHook_revert(_buyer, tokenId);
+
+        // turn off hook
+        _turnOffOwnerOfHook();
+        _assertOwner(address(erc721Mock), _buyer, tokenId);
+    }
+
+    function _turnOffOwnerOfHook() internal {
+        _setHook(address(erc721Mock), OwnerOf, address(0));
     }
 }

@@ -36,6 +36,6 @@ contract OwnerOfHookMock is IOwnerOfHook {
         uint256
     ) external view override returns (address, bool) {
         if (revertOwnerOfOverrideHook) revert OwnerOfHook_Executed();
-        return (fixedOwner, true); // run super
+        return (fixedOwner, false); // run super
     }
 }

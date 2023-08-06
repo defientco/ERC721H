@@ -91,7 +91,6 @@ contract ERC721ACH is IERC721ACH, ERC721AC {
         }
     }
 
-<<<<<<< HEAD
     /**
      * @notice Returns the owner of the `tokenId` token.
      * @dev The owner of a token is also its approver by default.
@@ -101,35 +100,22 @@ contract ERC721ACH is IERC721ACH, ERC721AC {
     function ownerOf(
         uint256 tokenId
     ) public view virtual override returns (address) {
-        IOwnerOfHook hook = IOwnerOfHook(hooks[HookType.OwnerOf]);
-
-        if (address(hook) != address(0) && hook.useOwnerOfHook(tokenId)) {
-            return hook.ownerOfHook(tokenId);
-        }
-
-        return super.ownerOf(tokenId);
-=======
-    function ownerOf(uint256 tokenId) public view virtual override returns (address) {
         address owner;
         bool runSuper;
 
         IOwnerOfHook ownerOfHook = IOwnerOfHook(hooks[HookType.OwnerOf]);
 
-        if (
-            address(ownerOfHook) != address(0) &&
-            ownerOfHook.useOwnerOfHook(tokenId)
-        ) {
-            (owner, runSuper) = ownerOfHook.ownerOfOverrideHook(tokenId);
+        if (address(ownerOfHook) != address(0)) {
+            (owner, runSuper) = ownerOfHook.ownerOfHook(tokenId);
         } else {
             runSuper = true;
         }
-        
+
         if (runSuper) {
             owner = super.ownerOf(tokenId);
         }
 
         return owner;
->>>>>>> fba41f638a62e122470d308bdb8723c7d1a31574
     }
 
     /**
