@@ -33,13 +33,8 @@ contract AfterTokenTransfersHookTest is DSTest, HookUtils {
         vm.expectRevert();
         erc721Mock.setHook(AfterTokenTransfers, address(hookMock));
 
-        vm.prank(DEFAULT_OWNER_ADDRESS);
-        erc721Mock.setHook(AfterTokenTransfers, address(hookMock));
-
-        assertEq(
-            address(hookMock),
-            address(erc721Mock.getHook(AfterTokenTransfers))
-        );
+        //  Verify Success
+        _setHook(address(erc721Mock), AfterTokenTransfers, address(hookMock));
     }
 
     function test_afterTokenTransfersHook(
@@ -74,6 +69,28 @@ contract AfterTokenTransfersHookTest is DSTest, HookUtils {
             AfterTokenTransfersHookMock
                 .AfterTokenTransfersHook_Executed
                 .selector
+        );
+    }
+
+    function test_turn_off_hook(
+        address _firstOwner,
+        address _secondOwner,
+        uint256 startTokenId,
+        uint256 quantity
+    ) public {
+        test_afterTokenTransfersHook(
+            _firstOwner,
+            _secondOwner,
+            startTokenId,
+            quantity
+        );
+
+        _setHook(address(erc721Mock), AfterTokenTransfers, address(0));
+        _assertNormalTransfer(
+            address(erc721Mock),
+            _secondOwner,
+            _firstOwner,
+            startTokenId
         );
     }
 }

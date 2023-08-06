@@ -5,7 +5,6 @@ import {Vm} from "forge-std/Vm.sol";
 import {DSTest} from "ds-test/test.sol";
 import {ERC721ACHMock} from "./ERC721ACHMock.sol";
 import {IERC721A} from "lib/ERC721A/contracts/IERC721A.sol";
-import {BeforeTokenTransfersHookMock} from "../utils/hooks/BeforeTokenTransfersHookMock.sol";
 import {IERC721ACH} from "../../src/interfaces/IERC721ACH.sol";
 
 contract HookUtils is DSTest {
@@ -52,5 +51,18 @@ contract HookUtils is DSTest {
         vm.prank(_from);
         vm.expectRevert(_err);
         ERC721ACHMock(_target).transferFrom(_from, _to, _tokenId);
+    }
+
+    function _setHook(
+        address _target,
+        IERC721ACH.HookType _type,
+        address _hook
+    ) internal {
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        ERC721ACHMock(_target).setHook(_type, address(_hook));
+        assertEq(
+            address(_hook),
+            address(ERC721ACHMock(_target).getHook(_type))
+        );
     }
 }
