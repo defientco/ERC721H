@@ -86,16 +86,8 @@ contract ERC721ACH is IERC721ACH, ERC721AC {
         IAfterTokenTransfersHook hook = IAfterTokenTransfersHook(
             hooks[HookType.AfterTokenTransfers]
         );
-        if (
-            address(hook) != address(0) &&
-            hook.useAfterTokenTransfersHook(from, to, startTokenId, quantity)
-        ) {
-            hook.afterTokenTransfersOverrideHook(
-                from,
-                to,
-                startTokenId,
-                quantity
-            );
+        if (address(hook) != address(0)) {
+            hook.afterTokenTransfersHook(from, to, startTokenId, quantity);
         }
     }
 

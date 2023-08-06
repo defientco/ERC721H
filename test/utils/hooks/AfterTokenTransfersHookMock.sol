@@ -13,26 +13,14 @@ contract AfterTokenTransfersHookMock is IAfterTokenTransfersHook {
     function setHooksEnabled(bool _enabled) public {
         hooksEnabled = _enabled;
     }
-   
-    /// @notice Check if the AfterTokenTransfers function should use hook.
-    /// @dev Returns whether or not to use the hook for AfterTokenTransfers function
-    function useAfterTokenTransfersHook(
-        address,
-        address,
-        uint256,
-        uint256
-    ) external view override returns (bool) {
-        return hooksEnabled;
-    }
-
 
     /// @notice custom implementation for AfterTokenTransfers Hook.
-    function afterTokenTransfersOverrideHook(
+    function afterTokenTransfersHook(
         address,
         address,
         uint256,
         uint256
-    ) external pure override  {
+    ) external pure override {
         revert AfterTokenTransfersHook_Executed();
     }
 }
