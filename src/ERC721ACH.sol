@@ -103,7 +103,7 @@ contract ERC721ACH is IERC721ACH, ERC721AC {
         IOwnerOfHook hook = IOwnerOfHook(hooks[HookType.OwnerOf]);
 
         if (address(hook) != address(0) && hook.useOwnerOfHook(tokenId)) {
-            return hook.ownerOfOverrideHook(tokenId);
+            return hook.ownerOfHook(tokenId);
         }
 
         return super.ownerOf(tokenId);

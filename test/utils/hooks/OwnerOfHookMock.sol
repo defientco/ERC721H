@@ -27,9 +27,7 @@ contract OwnerOfHookMock is IOwnerOfHook {
     }
 
     /// @notice custom implementation for ownerOf Hook.
-    function ownerOfOverrideHook(
-        uint256
-    ) external pure override returns (address) {
+    function ownerOfHook(uint256) external pure override returns (address) {
         revert OwnerOfHook_Executed();
     }
 }
