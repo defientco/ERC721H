@@ -99,14 +99,13 @@ contract ERC721ACH is IERC721ACH, ERC721AC {
      */
     function ownerOf(
         uint256 tokenId
-    ) public view virtual override returns (address) {
-        address owner;
+    ) public view virtual override returns (address owner) {
         bool runSuper;
 
-        IOwnerOfHook ownerOfHook = IOwnerOfHook(hooks[HookType.OwnerOf]);
+        IOwnerOfHook hook = IOwnerOfHook(hooks[HookType.OwnerOf]);
 
-        if (address(ownerOfHook) != address(0)) {
-            (owner, runSuper) = ownerOfHook.ownerOfHook(tokenId);
+        if (address(hook) != address(0)) {
+            (owner, runSuper) = hook.ownerOfHook(tokenId);
         } else {
             runSuper = true;
         }
@@ -114,8 +113,6 @@ contract ERC721ACH is IERC721ACH, ERC721AC {
         if (runSuper) {
             owner = super.ownerOf(tokenId);
         }
-
-        return owner;
     }
 
     /**
