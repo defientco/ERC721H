@@ -44,10 +44,10 @@ contract OwnerOfHookTest is DSTest {
 
         test_setOwnerOfHook();
         erc721Mock.mint(DEFAULT_BUYER_ADDRESS, tokenId);
-
         assertEq(DEFAULT_BUYER_ADDRESS, erc721Mock.ownerOf(tokenId));
 
         hookMock.setHooksEnabled(true);
+        hookMock.setRevertOwnerOfOverrideHook(true);
         vm.expectRevert(OwnerOfHookMock.OwnerOfHook_Executed.selector);
         erc721Mock.ownerOf(tokenId);
     }
