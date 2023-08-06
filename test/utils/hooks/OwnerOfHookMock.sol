@@ -25,19 +25,11 @@ contract OwnerOfHookMock is IOwnerOfHook {
         fixedOwner = _fixedOwner;
     }
 
-    /// @notice Check if the ownerOf function should use hook.
-    /// @dev Returns whether or not to use the hook for ownerOf function
-    function useOwnerOfHook(
-        uint256
-    ) external view override returns (bool) {
-        return hooksEnabled;
-    }
-
     /// @notice custom implementation for ownerOf Hook.
-    function ownerOfOverrideHook(
+    function ownerOfHook(
         uint256
     ) external view override returns (address, bool) {
         if (revertOwnerOfOverrideHook) revert OwnerOfHook_Executed();
-        return (address(0), true); // run super
+        return (fixedOwner, false); // run super
     }
 }
