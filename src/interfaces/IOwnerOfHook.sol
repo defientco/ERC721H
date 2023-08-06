@@ -12,13 +12,6 @@ interface IOwnerOfHook {
     event OwnerOfHookUsed(uint256 tokenId, address owner);
 
     /**
-     * @notice Checks if the owner retrieval function should use the custom hook.
-     * @param tokenId The ID of the token whose owner is being retrieved.
-     * @return boolean indicating whether or not to use the custom hook for the owner retrieval function.
-     */
-    function useOwnerOfHook(uint256 tokenId) external view returns (bool);
-
-    /**
      * @notice Provides a custom implementation for the owner retrieval process.
      * @param tokenId The ID of the token whose owner is being retrieved.
      * @return A tuple with The address of the owner of the token and A bool flag whether to run `super.ownerOf` or not

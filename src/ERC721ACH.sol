@@ -101,7 +101,6 @@ contract ERC721ACH is IERC721ACH, ERC721AC {
         uint256 tokenId
     ) public view virtual override returns (address owner) {
         bool runSuper;
-
         IOwnerOfHook hook = IOwnerOfHook(hooks[HookType.OwnerOf]);
 
         if (address(hook) != address(0)) {
