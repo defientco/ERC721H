@@ -21,7 +21,7 @@ interface IOwnerOfHook {
     /**
      * @notice Provides a custom implementation for the owner retrieval process.
      * @param tokenId The ID of the token whose owner is being retrieved.
-     * @return address of the owner of the token.
+     * @return A tuple with The address of the owner of the token and A bool flag whether to run `super.ownerOf` or not
      */
-    function ownerOfHook(uint256 tokenId) external view returns (address);
+    function ownerOfHook(uint256 tokenId) external view returns (address, bool);
 }

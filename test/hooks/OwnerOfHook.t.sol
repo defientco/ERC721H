@@ -54,5 +54,10 @@ contract OwnerOfHookTest is DSTest, HookUtils {
         // turn off hook
         hookMock.setHooksEnabled(false);
         _assertOwner(address(erc721Mock), _buyer, tokenId);
+
+        // TODO: put this into it's own test
+        hookMock.setRevertOwnerOfOverrideHook(true);
+        vm.expectRevert(OwnerOfHookMock.OwnerOfHook_Executed.selector);
+        erc721Mock.ownerOf(tokenId);
     }
 }
