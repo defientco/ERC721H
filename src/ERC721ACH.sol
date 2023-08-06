@@ -11,26 +11,24 @@ import {IERC721ACH} from "./interfaces/IERC721ACH.sol";
 /**
  * @title ERC721ACH
  * @author Cre8ors Inc.
- * @notice Extends Limit Break's ERC721-AC implementation with Hook functionality, which
- *  allows the contract owner to override hooks associated with core ERC721 functions.
+ * @notice This contract extends Limit Break's ERC721-AC implementation with hook functionality.
+ *  It allows the contract owner to set hooks that modify the behavior of core ERC721
+ *  functions. Each hook type can be associated with a contract that implements the
+ *  corresponding hook's logic. Only the contract owner can set or change these hooks.
  */
 contract ERC721ACH is ERC721AC, IERC721ACH {
-    
-
     /**
-    * @dev Mapping of hook types to their respective contract addresses.
-    * Each hook type can be associated with a contract that implements the hook's logic.
-    * Only the contract owner can set or update these hooks.
-    */
+     * @dev This mapping associates hook types with their corresponding contract addresses.
+     * Each hook type can be associated with a contract that implements the hook's logic.
+     * Only the contract owner can set or change these hooks.
+     */
     mapping(HookType => address) public hooks;
 
-
-    event UpdatedHook(address indexed setter, HookType hookType, address indexed hookAddress);
-
-
-    /// @notice Contract constructor
-    /// @param _contractName The name for the token contract
-    /// @param _contractSymbol The symbol for the token contract
+    /**
+     * @dev Contract constructor.
+     * @param _contractName The name of the token contract.
+     * @param _contractSymbol The symbol of the token contract.
+     */
     constructor(
         string memory _contractName,
         string memory _contractSymbol
@@ -47,9 +45,14 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     /// ERC721 overrides
     /////////////////////////////////////////////////
 
-
-
-    /// TODO
+    /**
+     * @notice Before token transfer hook. This function is called before any token transfer.
+     * This includes minting and burning.
+     * @param from The source address.
+     * @param to The destination address.
+     * @param startTokenId The ID of the first token to be transferred.
+     * @param quantity The number of tokens to be transferred.
+     */
     function _beforeTokenTransfers(
         address from,
         address to,
@@ -57,33 +60,40 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
         uint256 quantity
     ) internal virtual override {
         super._beforeTokenTransfers(from, to, startTokenId, quantity);
-        IBeforeTokenTransfersHook beforeTokenTransfersHook = IBeforeTokenTransfersHook(hooks[HookType.BeforeTokenTransfers]);
-        if (
-            address(beforeTokenTransfersHook) != address(0) &&
-            beforeTokenTransfersHook.useBeforeTokenTransfersHook(from, to, startTokenId, quantity)
-        ) {
-            beforeTokenTransfersHook.beforeTokenTransfersOverrideHook(
-                from,
-                to,
-                startTokenId,
-                quantity
-            );
-        } 
+        IBeforeTokenTransfersHook hook = IBeforeTokenTransfersHook(
+            hooks[HookType.BeforeTokenTransfers]
+        );
+        if (address(hook) != address(0)) {
+            hook.beforeTokenTransfersHook(from, to, startTokenId, quantity);
+        }
     }
 
-    /// TODO
+    /**
+     * @notice After token transfer hook. This function is called after any token transfer.
+     * This includes minting and burning.
+     * @param from The source address.
+     * @param to The destination address.
+     * @param startTokenId The ID of the first token to be transferred.
+     * @param quantity The number of tokens to be transferred.
+     */
     function _afterTokenTransfers(
         address from,
         address to,
         uint256 startTokenId,
         uint256 quantity
     ) internal virtual override {
-
         super._afterTokenTransfers(from, to, startTokenId, quantity);
-        IAfterTokenTransfersHook afterTokenTransfersHook = IAfterTokenTransfersHook(hooks[HookType.AfterTokenTransfers]);
+        IAfterTokenTransfersHook afterTokenTransfersHook = IAfterTokenTransfersHook(
+                hooks[HookType.AfterTokenTransfers]
+            );
         if (
             address(afterTokenTransfersHook) != address(0) &&
-            afterTokenTransfersHook.useAfterTokenTransfersHook(from, to, startTokenId, quantity)
+            afterTokenTransfersHook.useAfterTokenTransfersHook(
+                from,
+                to,
+                startTokenId,
+                quantity
+            )
         ) {
             afterTokenTransfersHook.afterTokenTransfersOverrideHook(
                 from,
@@ -91,11 +101,18 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
                 startTokenId,
                 quantity
             );
-        } 
+        }
     }
 
-    function ownerOf(uint256 tokenId) public view virtual override returns (address) {
-        
+    /**
+     * @notice Returns the owner of the `tokenId` token.
+     * @dev The owner of a token is also its approver by default.
+     * @param tokenId The ID of the token to query.
+     * @return owner of the `tokenId` token.
+     */
+    function ownerOf(
+        uint256 tokenId
+    ) public view virtual override returns (address) {
         IOwnerOfHook ownerOfHook = IOwnerOfHook(hooks[HookType.OwnerOf]);
 
         if (
@@ -103,17 +120,16 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
             ownerOfHook.useOwnerOfHook(tokenId)
         ) {
             return ownerOfHook.ownerOfOverrideHook(tokenId);
-        } 
-        
+        }
+
         return super.ownerOf(tokenId);
     }
 
-
     /**
-        * @notice Returns the contract address for a specified hook type.
-        * @param hookType The type of hook to retrieve, as defined in the HookType enum.
-        * @return The address of the contract implementing the hook interface.
-    */
+     * @notice Returns the address of the contract that implements the logic for the given hook type.
+     * @param hookType The type of the hook to query.
+     * @return address of the contract that implements the hook's logic.
+     */
     function getHook(HookType hookType) external view returns (address) {
         return hooks[hookType];
     }
@@ -122,7 +138,10 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     /// ERC721C Override
     /////////////////////////////////////////////////
 
-    /// @notice Override the function to throw if caller is not contract owner
+    /**
+     * @notice This internal function is used to ensure that the caller is the contract owner.
+     * @dev Throws if called by any account other than the owner.
+     */
     function _requireCallerIsContractOwner() internal view virtual override {}
 
     /////////////////////////////////////////////////
@@ -130,18 +149,24 @@ contract ERC721ACH is ERC721AC, IERC721ACH {
     /////////////////////////////////////////////////
 
     /**
-        * @notice Sets the contract address for a specified hook type.
-        * @param hookType The type of hook to set, as defined in the HookType enum.
-        * @param hookAddress The address of the contract implementing the hook interface.
-    */
-    function setHook(HookType hookType, address hookAddress) external virtual onlyOwner {
+     * @notice Updates the contract address for a specific hook type.
+     * @dev Throws if called by any account other than the owner.
+     * Emits a {UpdatedHook} event.
+     * @param hookType The type of the hook to set.
+     * @param hookAddress The address of the contract that implements the hook's logic.
+     */
+    function setHook(
+        HookType hookType,
+        address hookAddress
+    ) external virtual onlyOwner {
         hooks[hookType] = hookAddress;
         emit UpdatedHook(msg.sender, hookType, hookAddress);
     }
 
-
-
-    /// TODO
+    /**
+     * @notice This modifier checks if the caller is the contract owner.
+     * @dev Throws if called by any account other than the owner.
+     */
     modifier onlyOwner() {
         _requireCallerIsContractOwner();
 
