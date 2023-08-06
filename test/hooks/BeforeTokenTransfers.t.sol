@@ -63,7 +63,7 @@ contract BeforeTokenTransfersHookTest is DSTest {
         _assertHookRevert(_secondOwner, _firstOwner, startTokenId);
     }
 
-    function _assumeNotBurn(address _wallet) internal {
+    function _assumeNotBurn(address _wallet) internal pure {
         vm.assume(_wallet != address(0));
     }
 

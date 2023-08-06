@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
 
+import {IERC721ACH} from "./interfaces/IERC721ACH.sol";
 import {ERC721AC} from "ERC721C/erc721c/ERC721AC.sol";
 import {IERC721A} from "erc721a/contracts/IERC721A.sol";
 import {IBeforeTokenTransfersHook} from "./interfaces/IBeforeTokenTransfersHook.sol";
 import {IAfterTokenTransfersHook} from "./interfaces/IAfterTokenTransfersHook.sol";
 import {IOwnerOfHook} from "./interfaces/IOwnerOfHook.sol";
-import {IERC721ACH} from "./interfaces/IERC721ACH.sol";
 
 /**
  * @title ERC721ACH
@@ -16,7 +16,7 @@ import {IERC721ACH} from "./interfaces/IERC721ACH.sol";
  *  functions. Each hook type can be associated with a contract that implements the
  *  corresponding hook's logic. Only the contract owner can set or change these hooks.
  */
-contract ERC721ACH is ERC721AC, IERC721ACH {
+contract ERC721ACH is IERC721ACH, ERC721AC {
     /**
      * @dev This mapping associates hook types with their corresponding contract addresses.
      * Each hook type can be associated with a contract that implements the hook's logic.
