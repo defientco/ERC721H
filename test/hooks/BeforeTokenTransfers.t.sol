@@ -48,11 +48,12 @@ contract BeforeTokenTransfersHookTest is DSTest {
         uint256 startTokenId,
         uint256 quantity
     ) public {
-        vm.assume(quantity > 0);
-        vm.assume(startTokenId > 0);
+        _assumeGtZero(quantity);
+        _assumeGtZero(startTokenId);
         vm.assume(quantity < 10_000);
         vm.assume(quantity >= startTokenId);
         _assumeNotBurn(_firstOwner);
+        _assumeNotBurn(_secondOwner);
 
         // Mint some tokens first
         erc721Mock.mint(_firstOwner, quantity);
@@ -65,6 +66,10 @@ contract BeforeTokenTransfersHookTest is DSTest {
 
     function _assumeNotBurn(address _wallet) internal pure {
         vm.assume(_wallet != address(0));
+    }
+
+    function _assumeGtZero(uint256 _num) internal pure {
+        vm.assume(_num > 0);
     }
 
     function _assertNormalTransfer(
